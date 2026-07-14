@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
-from routes import users, github
+from app.routes import users, github
 from dotenv import load_dotenv
 
 load_dotenv()

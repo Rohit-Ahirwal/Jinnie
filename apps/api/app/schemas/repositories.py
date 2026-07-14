@@ -8,6 +8,7 @@ class RepositoryCreate(BaseModel):
     private: bool
     default_branch: str
     repo_url: str
+    clone_url: str
     language: str | None = None
     stars: int = 0
     issues: int = 0

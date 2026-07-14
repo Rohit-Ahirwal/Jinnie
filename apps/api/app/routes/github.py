@@ -1,14 +1,13 @@
 from fastapi import APIRouter, Depends
-import httpx
-import os
+from app.tasks.repository import analyze_repository
 
 from sqlalchemy.orm import Session
 
-from auth.dependencies import get_current_user
-from database.models import Repositories
-from database.session import get_db
-from schemas.repositories import RepositoryCreate
-from services.github import get_or_create_github_user, get_user_repo, get_github_connection
+from app.auth.dependencies import get_current_user
+from app.database.models import Repositories
+from app.database.session import get_db
+from app.schemas.repositories import RepositoryCreate
+from app.services.github import get_or_create_github_user, get_user_repo, get_github_connection
 
 router = APIRouter()
 
@@ -41,5 +40,7 @@ async def github_repos(data: RepositoryCreate, user=Depends(get_current_user), d
     db.add(repo)
     db.commit()
     db.refresh(repo)
+
+    analyze_repository.delay(repo.id)
 
     return repo

@@ -3,7 +3,6 @@ import {
   GitBranch,
   MessageSquare,
   Search,
-  ShieldCheck,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 

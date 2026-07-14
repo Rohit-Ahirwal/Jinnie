@@ -11,6 +11,7 @@ export type Repo = {
   status: "completed" | "analyzing" | "pending" | "failed";
   default_branch: string,
   html_url: string,
+  clone_url: string
   owner: {
     login: string
   }

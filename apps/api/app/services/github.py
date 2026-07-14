@@ -4,9 +4,75 @@ import os
 from sqlalchemy.orm import Session
 # from datetime import datetime, timedelta
 
-from database.models import GithubConnection
+from app.database.models import GithubConnection
+import base64
+
+
+def decode_content(content: str):
+    return base64.b64decode(content).decode("utf-8")
 
 GITHUB_API = "https://api.github.com"
+
+class GithubService:
+
+    def __init__(self, token: str):
+        self.token = token
+
+        self.headers = {
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/vnd.github+json",
+        }
+
+
+    async def get_repository_tree(
+        self,
+        owner: str,
+        repo: str,
+        branch: str
+    ):
+
+        url = (
+            f"{GITHUB_API}/repos/"
+            f"{owner}/{repo}/git/trees/{branch}"
+            f"?recursive=1"
+        )
+
+
+        async with httpx.AsyncClient() as client:
+
+            response = await client.get(
+                url,
+                headers=self.headers
+            )
+
+            response.raise_for_status()
+
+            return response.json()
+
+    async def get_file_content(
+            self,
+            owner: str,
+            repo: str,
+            path: str,
+            branch: str
+    ):
+        url = (
+            f"{GITHUB_API}/repos/"
+            f"{owner}/{repo}/contents/{path}"
+            f"?ref={branch}"
+        )
+
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                url,
+                headers=self.headers
+            )
+
+            response.raise_for_status()
+
+            data = response.json()
+
+            return data
 
 async def exchangeCode(code: str):
     async with httpx.AsyncClient() as client:

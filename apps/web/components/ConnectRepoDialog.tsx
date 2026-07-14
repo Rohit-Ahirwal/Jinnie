@@ -74,6 +74,7 @@ export default function ConnectRepoDialog({
           private: repo.private,
           default_branch: repo.default_branch,
           repo_url: repo.html_url,
+          clone_url: `https://x-access-token:{github_token}@github.com/${repo.owner.login}/${repo.name}.git`,
           language: repo.language ?? "Unknown",
           stars: repo.stars ?? 0,
           issues: 0,

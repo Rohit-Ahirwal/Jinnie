@@ -1,10 +1,9 @@
 from fastapi import APIRouter, Depends
-from auth.dependencies import get_current_user
-from database.session import get_db
+from app.auth.dependencies import get_current_user
+from app.database.session import get_db
 from sqlalchemy.orm import Session
 
-from services.github import get_github_connection
-from services.user_service import get_or_create_user
+from app.services.user_service import get_or_create_user
 
 router = APIRouter()
 

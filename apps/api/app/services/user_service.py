@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from database.models import User
-from services.clerk_service import get_clerk_user
+from app.database.models import User
+from app.services.clerk_service import get_clerk_user
 
 
 def get_or_create_user(

@@ -5,6 +5,7 @@ from enum import Enum as _Enum
 
 class AnalysisStatus(str, _Enum):
     pending = "pending"
+    syncing = "syncing"
     analyzing = "analyzing"
     completed = "completed"
     failed = "failed"
@@ -157,6 +158,8 @@ class Repositories(Base):
 
     repo_url = Column(String, nullable=False)
 
+    clone_url = Column(String, nullable=True)
+
     language = Column(String, nullable=False)
 
     stars = Column(Integer, nullable=False)
@@ -167,6 +170,7 @@ class Repositories(Base):
     status = Column(Enum(AnalysisStatus), nullable=False, default=AnalysisStatus.pending)
 
     analyzed_at = Column(DateTime, default=datetime.utcnow)
+    last_synced_at = Column(DateTime, default=datetime.utcnow)
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
@@ -174,3 +178,24 @@ class Repositories(Base):
         "User",
         back_populates="repositories"
     )
+
+class RepositoryFile(Base):
+    __tablename__ = "repository_files"
+
+    id = Column(Integer, primary_key=True)
+    repository_id = Column(Integer, ForeignKey("repositories.id"), nullable=False)
+    path = Column(String, nullable=False)
+    filename = Column(String, nullable=False)
+    branch = Column(String, nullable=False)
+    extension = Column(String, nullable=False)
+    language = Column(String, nullable=False)
+    size = Column(Integer, nullable=False)
+    storage_key = Column(String, nullable=False)
+    hash = Column(String, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow
+    )
+

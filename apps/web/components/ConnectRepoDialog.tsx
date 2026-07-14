@@ -24,27 +24,30 @@ import { Repo } from "@/app/types";
 import { useDebounce } from "@/hooks/use-debounce";
 import FindingRepos from "./FindingRepos";
 import NoReposFound from "./NoReposFound";
+import { apiRequest } from "@/lib/api/auth-client";
+import ConnectingRepoDialog from "./ConnectingRepo";
 
 interface ConnectRepoDialogProps {
   githubConnected: boolean;
   repositories?: Repo[];
   onGithubConnect?: () => void;
-  onAnalyze?: (repo: Repo) => void;
   setSearchValue: Dispatch<SetStateAction<string | null>>;
   loading: boolean;
   setLoading: Dispatch<SetStateAction<boolean>>;
+  token: string | null;
 }
 
 export default function ConnectRepoDialog({
   githubConnected,
   repositories = [],
-  onAnalyze,
   setSearchValue,
   loading,
   setLoading,
+  token,
 }: ConnectRepoDialogProps) {
   const [selectedRepo, setSelectedRepo] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [connecting, setConnecting] = useState(false);
 
   const debouncedSearch = useDebounce(search, 500);
 
@@ -55,6 +58,37 @@ export default function ConnectRepoDialog({
   const selectedRepository = repositories.find(
     (repo) => repo.id === selectedRepo,
   );
+
+  const handleAnalyze = async (repo: Repo) => {
+    try {
+      setConnecting(true);
+
+      await apiRequest(token!, {
+        method: "POST",
+        url: "/github/repos",
+        data: {
+          github_repo_id: String(repo.id),
+          repo_name: repo.name,
+          repo_description: repo.description,
+          owner: repo.owner.login,
+          private: repo.private,
+          default_branch: repo.default_branch,
+          repo_url: repo.html_url,
+          language: repo.language ?? "Unknown",
+          stars: repo.stars ?? 0,
+          issues: 0,
+        },
+      });
+
+      setSelectedRepo(null);
+
+      // optional: close dialog later
+    } catch (error) {
+      console.error("Failed to save repository:", error);
+    } finally {
+      setConnecting(false);
+    }
+  };
 
   return (
     <Dialog>
@@ -129,6 +163,7 @@ export default function ConnectRepoDialog({
             animate={{ opacity: 1, y: 0 }}
             className="space-y-4 mt-4"
           >
+            <ConnectingRepoDialog open={connecting} />
             <div className="relative">
               <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
 
@@ -202,7 +237,7 @@ export default function ConnectRepoDialog({
             <Button
               disabled={!selectedRepository}
               onClick={() =>
-                selectedRepository && onAnalyze?.(selectedRepository)
+                selectedRepository && handleAnalyze(selectedRepository)
               }
               className="w-full h-12 rounded-full bg-primary text-primary-foreground"
             >

@@ -16,6 +16,7 @@ import NoRepositories from "@/components/NoRepositories";
 
 const Dashboard = () => {
   const { getToken } = useAuth();
+  const [token, setToken] = useState<string|null>(null);
   const [user, setUser] = useState<UserProfile>();
   const [searchValue, setSearchValue] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -27,6 +28,8 @@ const Dashboard = () => {
       const token = await getToken({
         template: "fastapi",
       });
+
+      setToken(token);
 
       const response = await apiRequest<UserProfile>(token!, {
         method: "GET",
@@ -58,10 +61,8 @@ const Dashboard = () => {
     }
 
     getUser();
-    getRepos();
-  }, [getToken, searchValue]);
-
-  const repos: Repo[] = [];
+    if (user?.github_connected) getRepos();
+  }, [getToken, searchValue, user?.github_connected]);
 
   if (loading) return <Loader />;
 
@@ -83,7 +84,7 @@ const Dashboard = () => {
 
                 <CardContent className="p-0">
                   <div className="font-semibold text-3xl leading-9 tracking-tight">
-                    24
+                    {user.repositories.length}
                   </div>
                   <p className="text-muted-foreground text-xs leading-4">
                     Connected repositories
@@ -151,6 +152,7 @@ const Dashboard = () => {
                   setSearchValue={setSearchValue}
                   loading={repoLoading}
                   setLoading={setRepoLoading}
+                  token={token}
                 />
               </div>
 
@@ -171,10 +173,10 @@ const Dashboard = () => {
                 </Select>
               </div>
 
-              {repos.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {repos.map((repo) => (
-                    <RepoCard key={repo.name} repo={repo} />
+              {user.repositories.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {user.repositories.map((repo) => (
+                    <RepoCard key={repo.github_repo_id} repo={repo} />
                   ))}
                 </div>
               ) : (

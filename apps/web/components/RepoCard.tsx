@@ -10,28 +10,31 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Repo } from "@/app/types";
+import { RepoDB } from "@/app/types";
 import { timeAgo } from "@/lib/timeAgo";
 
-export default function RepoCard({ repo }: { repo: Repo }) {
+export default function RepoCard({ repo }: { repo: RepoDB }) {
   return (
     <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
       <Card className="group rounded-2xl border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 shadow-sm hover:shadow-md transition p-5 gap-4">
         <CardHeader className="p-0 gap-4">
           <div className="flex justify-between gap-3">
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <span
                   className={`size-2 rounded-full ${repo.status === "completed" ? "bg-emerald-500" : "bg-amber-500"}`}
                 />
 
-                <h3 className="font-semibold text-neutral-950 dark:text-neutral-50 truncate">
-                  {repo.name}
+                <h3
+                  title={repo.repo_name}
+                  className="font-semibold text-neutral-950 dark:text-neutral-50 truncate max-w-[180px] sm:max-w-[220px]"
+                >
+                  {repo.repo_name}
                 </h3>
               </div>
 
               <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-2 line-clamp-2">
-                {repo.description}
+                {repo.repo_description}
               </p>
             </div>
 

@@ -5,7 +5,9 @@ import os
 from sqlalchemy.orm import Session
 
 from auth.dependencies import get_current_user
+from database.models import Repositories
 from database.session import get_db
+from schemas.repositories import RepositoryCreate
 from services.github import get_or_create_github_user, get_user_repo, get_github_connection
 
 router = APIRouter()
@@ -20,3 +22,24 @@ async def github_repos(search: str | None = None, user=Depends(get_current_user)
     github_user = get_github_connection(user["sub"], db)
     repos = await get_user_repo(github_user.access_token, search)
     return repos
+
+@router.post("/repos")
+async def github_repos(data: RepositoryCreate, user=Depends(get_current_user), db: Session = Depends(get_db)):
+    existing = db.query(Repositories).filter(
+        Repositories.github_repo_id == data.github_repo_id,
+        Repositories.user_id == user["sub"]
+    ).first()
+
+    if existing:
+        return existing
+
+    repo = Repositories(
+        user_id=user["sub"],
+        **data.model_dump()
+    )
+
+    db.add(repo)
+    db.commit()
+    db.refresh(repo)
+
+    return repo

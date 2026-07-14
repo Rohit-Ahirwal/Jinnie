@@ -1,6 +1,6 @@
 from datetime import datetime
-from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text, Enum
+from sqlalchemy.orm import DeclarativeBase, relationship
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text, Enum, UniqueConstraint
 from enum import Enum as _Enum
 
 class AnalysisStatus(str, _Enum):
@@ -16,26 +16,26 @@ class User(Base):
 
     __tablename__ = "users"
 
-    id = Column(
-        Integer,
-        primary_key=True
-    )
+    id = Column(Integer, primary_key=True)
 
     clerk_id = Column(
         String,
-        unique=True
+        unique=True,
+        nullable=False,
+        index=True
     )
 
     email = Column(
         String,
-        unique=True
+        unique=True,
+        nullable=False,
+        index=True
     )
 
     is_active = Column(Boolean, default=True)
 
     avatar_url = Column(
         String,
-        unique=True,
         nullable=True
     )
 
@@ -43,8 +43,25 @@ class User(Base):
     last_name = Column(String)
 
     created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow
+    )
+
+    repositories = relationship(
+        "Repositories",
+        back_populates="user"
+    )
+    github_connection = relationship(
+        "GithubConnection",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan"
+    )
 
 class GithubConnection(Base):
+
     __tablename__ = "github_connections"
 
     id = Column(
@@ -55,15 +72,21 @@ class GithubConnection(Base):
     user_id = Column(
         String,
         ForeignKey("users.clerk_id"),
-        unique=True
+        unique=True,
+        nullable=False
     )
 
     github_id = Column(
         String,
-        unique=True
+        unique=True,
+        nullable=False,
+        index=True
     )
 
-    username = Column(String, nullable=False)
+    username = Column(
+        String,
+        nullable=False
+    )
 
     email = Column(
         String,
@@ -96,16 +119,31 @@ class GithubConnection(Base):
         onupdate=datetime.utcnow
     )
 
+
+    user = relationship(
+        "User",
+        back_populates="github_connection"
+    )
+
 class Repositories(Base):
     __tablename__ = "repositories"
+
+    __table_args__ = (
+        UniqueConstraint(
+            "user_id",
+            "github_repo_id",
+            name="unique_user_repository"
+        ),
+    )
+
     id = Column(
         Integer,
         primary_key=True
     )
 
-    user_id = Column(String, ForeignKey("users.clerk_id"), unique=True)
+    user_id = Column(String, ForeignKey("users.clerk_id"), nullable=False)
 
-    github_repo_id = Column(String, unique=True, nullable=False)
+    github_repo_id = Column(String, nullable=False)
 
     repo_name = Column(String, nullable=False)
 
@@ -132,3 +170,7 @@ class Repositories(Base):
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
+    user = relationship(
+        "User",
+        back_populates="repositories"
+    )

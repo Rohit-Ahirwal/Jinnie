@@ -1,0 +1,21 @@
+services:
+
+  postgres:
+    image: postgres:17
+    container_name: jinnie-postgres
+    restart: always
+
+    environment:
+      POSTGRES_USER: jinnie
+      POSTGRES_PASSWORD: jinnie_password
+      POSTGRES_DB: jinnie_db
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+
+volumes:
+  postgres_data:

@@ -1,13 +1,27 @@
+"use client";
+import { Button } from "@/components/ui/button";
+import SampleLogo from "./SampleLogo";
+import ThemeSwitcher from "./theme-switcher";
 import {
   CircleUserRound,
   GitBranch,
   Settings,
   LayoutDashboard,
   MessageSquare,
+  User,
+  LogOut,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import SampleLogo from "./SampleLogo";
-import ThemeSwitcher from "./theme-switcher";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { SignOutButton } from "@clerk/nextjs";
 
 const Header2 = () => {
   return (
@@ -62,12 +76,41 @@ const Header2 = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            className="size-10 rounded-full text-muted-foreground p-0 shrink-0"
-          >
-            <CircleUserRound className="size-5" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  variant={"ghost"}
+                  className="size-10 rounded-full text-muted-foreground p-0 shrink-0"
+                />
+              }
+            >
+              <CircleUserRound className="size-5" />
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent align="end" className="w-48 rounded-xl">
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              </DropdownMenuGroup>
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuGroup>
+                <DropdownMenuItem className={"cursor-pointer rounded"}>
+                  Account
+                </DropdownMenuItem>
+                <DropdownMenuItem className={"cursor-pointer rounded"}>
+                  Settings
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem className="text-red-500 cursor-pointer rounded">
+                <SignOutButton>Logout</SignOutButton>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           <ThemeSwitcher />
         </div>

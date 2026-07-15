@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
-from app.routes import users, github
+from app.routes import users, github, conversation
 from dotenv import load_dotenv
+
 
 load_dotenv()
 
@@ -29,6 +30,8 @@ app.include_router(
     github.router,
     prefix="/github"
 )
+
+app.include_router(conversation.router)
 
 @app.get("/")
 def root():

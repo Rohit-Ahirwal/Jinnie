@@ -1,7 +1,24 @@
-from datetime import datetime
-from sqlalchemy.orm import DeclarativeBase, relationship
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text, Enum, UniqueConstraint
+from datetime import datetime, UTC
 from enum import Enum as _Enum
+
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text, Enum, UniqueConstraint
+from sqlalchemy.orm import DeclarativeBase, relationship, Mapped, mapped_column
+
+
+class TimestampMixin:
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
 
 class AnalysisStatus(str, _Enum):
     pending = "pending"
@@ -11,11 +28,23 @@ class AnalysisStatus(str, _Enum):
     completed = "completed"
     failed = "failed"
 
+class MessageRole(str, _Enum):
+    user = "user"
+    assistant = "assistant"
+    system = "system"
+
+
+class MessageStatus(str, _Enum):
+    pending = "pending"
+    streaming = "streaming"
+    completed = "completed"
+    failed = "failed"
+
 class Base(DeclarativeBase):
     pass
 
-class User(Base):
 
+class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True)
@@ -62,8 +91,8 @@ class User(Base):
         cascade="all, delete-orphan"
     )
 
-class GithubConnection(Base):
 
+class GithubConnection(Base):
     __tablename__ = "github_connections"
 
     id = Column(
@@ -121,11 +150,11 @@ class GithubConnection(Base):
         onupdate=datetime.utcnow
     )
 
-
     user = relationship(
         "User",
         back_populates="github_connection"
     )
+
 
 class Repositories(Base):
     __tablename__ = "repositories"
@@ -179,6 +208,12 @@ class Repositories(Base):
         "User",
         back_populates="repositories"
     )
+    conversations = relationship(
+        "Conversation",
+        back_populates="repository",
+        cascade="all, delete-orphan",
+    )
+
 
 class RepositoryFile(Base):
     __tablename__ = "repository_files"
@@ -198,3 +233,64 @@ class RepositoryFile(Base):
         onupdate=datetime.utcnow
     )
 
+class Conversation(Base, TimestampMixin):
+    __tablename__ = "conversations"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    repository_id: Mapped[int] = mapped_column(
+        ForeignKey("repositories.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False
+    )
+
+    title: Mapped[str] = mapped_column(
+        String(255),
+        default="New Conversation",
+    )
+
+    repository = relationship(
+        "Repositories",
+        back_populates="conversations",
+    )
+
+    messages = relationship(
+        "Message",
+        back_populates="conversation",
+        cascade="all, delete-orphan",
+    )
+
+class Message(Base, TimestampMixin):
+    __tablename__ = "messages"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    conversation_id: Mapped[int] = mapped_column(
+        ForeignKey("conversations.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    role: Mapped[MessageRole] = mapped_column(
+        Enum(MessageRole),
+        nullable=False,
+    )
+
+    status: Mapped[MessageStatus] = mapped_column(
+        Enum(MessageStatus),
+        default=MessageStatus.completed,
+    )
+
+    content: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+
+    token_count: Mapped[int] = mapped_column(
+        default=0,
+    )
+
+    conversation = relationship(
+        "Conversation",
+        back_populates="messages",
+    )

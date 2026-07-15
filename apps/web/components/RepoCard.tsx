@@ -12,8 +12,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { RepoDB } from "@/app/types";
 import { timeAgo } from "@/lib/timeAgo";
+import { getRepositoryStatus } from "@/lib/repository-status";
 
 export default function RepoCard({ repo }: { repo: RepoDB }) {
+  const status = getRepositoryStatus(repo.status);
+
   return (
     <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
       <Card className="group rounded-2xl border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 shadow-sm hover:shadow-md transition p-5 gap-4">
@@ -90,33 +93,19 @@ export default function RepoCard({ repo }: { repo: RepoDB }) {
 
           <div className="space-y-2">
             <div className="flex justify-between text-xs">
-              <span
-                className={
-                  repo.status === "completed"
-                    ? "text-emerald-600 dark:text-emerald-400 font-medium"
-                    : "text-amber-600 dark:text-amber-400 font-medium"
-                }
-              >
-                {repo.status === "completed"
-                  ? "Analysis Complete"
-                  : "Analyzing..."}
-              </span>
+              <span className={status.textClass}>{status.label}</span>
 
               <span className="text-neutral-500 dark:text-neutral-400">
                 {repo.progress}%
               </span>
             </div>
 
-            <div className="h-2 bg-neutral-100 dark:bg-neutral-900 rounded-full overflow-hidden">
+            <div className="h-2 overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-900">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${repo.progress}%` }}
                 transition={{ duration: 0.8 }}
-                className={`h-full rounded-full ${
-                  repo.status === "completed"
-                    ? "bg-emerald-500"
-                    : "bg-amber-500"
-                }`}
+                className={`h-full rounded-full ${status.progressClass}`}
               />
             </div>
           </div>

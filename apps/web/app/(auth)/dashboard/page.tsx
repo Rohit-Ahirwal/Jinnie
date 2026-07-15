@@ -56,6 +56,8 @@ const Dashboard = () => {
         url: query,
       });
 
+      console.log(response.data)
+
       setRepositories(response.data);
       setRepoLoading(false);
     }

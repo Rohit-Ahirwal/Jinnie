@@ -9,12 +9,12 @@ export type Repo = {
   progress: number;
   analyzed_at: string | null;
   status: "completed" | "analyzing" | "pending" | "failed";
-  default_branch: string,
-  html_url: string,
-  clone_url: string
+  default_branch: string;
+  html_url: string;
+  clone_url: string;
   owner: {
-    login: string
-  }
+    login: string;
+  };
 };
 
 export type RepoDB = {
@@ -27,10 +27,16 @@ export type RepoDB = {
   issues: number;
   progress: number;
   analyzed_at: string | null;
-  status: "completed" | "analyzing" | "pending" | "failed";
-  default_branch: string,
-  repo_url: string,
-  owner: string,
+  status:
+    | "pending"
+    | "cloning"
+    | "scanning"
+    | "syncing"
+    | "completed"
+    | "failed";
+  default_branch: string;
+  repo_url: string;
+  owner: string;
 };
 
 export interface UserProfile {
@@ -42,5 +48,5 @@ export interface UserProfile {
   connection?: {
     username: string;
   };
-  repositories: RepoDB[]
+  repositories: RepoDB[];
 }

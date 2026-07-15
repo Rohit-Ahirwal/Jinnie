@@ -5,8 +5,9 @@ from enum import Enum as _Enum
 
 class AnalysisStatus(str, _Enum):
     pending = "pending"
+    cloning = "cloning"
+    scanning = "scanning"
     syncing = "syncing"
-    analyzing = "analyzing"
     completed = "completed"
     failed = "failed"
 
@@ -186,11 +187,9 @@ class RepositoryFile(Base):
     repository_id = Column(Integer, ForeignKey("repositories.id"), nullable=False)
     path = Column(String, nullable=False)
     filename = Column(String, nullable=False)
-    branch = Column(String, nullable=False)
     extension = Column(String, nullable=False)
     language = Column(String, nullable=False)
     size = Column(Integer, nullable=False)
-    storage_key = Column(String, nullable=False)
     hash = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(

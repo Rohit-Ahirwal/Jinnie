@@ -2,7 +2,7 @@ import uuid
 
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import Distance, VectorParams
-from qdrant_client.models import PointStruct
+from qdrant_client.models import PointStruct, FieldCondition, MatchValue, Filter
 from app.config import settings
 
 
@@ -66,4 +66,38 @@ class VectorStoreService:
         self.client.upsert(
             collection_name=self.COLLECTION_NAME,
             points=points,
+        )
+
+    def search(
+            self,
+            query_vector: list[float],
+            repository_id: int,
+            limit: int = 10,
+    ):
+        print("Searching repository:", repository_id, type(repository_id))
+        return self.client.query_points(
+            collection_name=self.COLLECTION_NAME,
+            query=query_vector,
+            query_filter=Filter(
+                must=[
+                    FieldCondition(
+                        key="repository_id",
+                        match=MatchValue(value=repository_id),
+                    )
+                ]
+            ),
+            limit=limit,
+        ).points
+
+    def delete_repository(self, repository_id: int):
+        self.client.delete(
+            collection_name=self.COLLECTION_NAME,
+            points_selector=Filter(
+                must=[
+                    FieldCondition(
+                        key="repository_id",
+                        match=MatchValue(value=repository_id),
+                    )
+                ]
+            ),
         )

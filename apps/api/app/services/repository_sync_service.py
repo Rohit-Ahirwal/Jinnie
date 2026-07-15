@@ -10,11 +10,10 @@ from app.services.ai.index_repository_service import IndexRepositoryService
 class RepositorySyncService:
     def sync(self, repository_id: int):
         db = SessionLocal()
+        # 1. Load Repo
+        repository = db.query(Repositories).filter(Repositories.id == repository_id).first()
 
         try:
-            # 1. Load Repo
-            repository = db.query(Repositories).filter(Repositories.id == repository_id).first()
-
             # 2. Clone Repo
             RepositoryStatusService.update(db=db, repository=repository, status=AnalysisStatus.cloning, progress=10)
 
@@ -31,7 +30,7 @@ class RepositorySyncService:
             RepositoryStatusService.update(db=db, repository=repository, status=AnalysisStatus.syncing, progress=60)
 
             # 4. Handling Chunking, Embedding, and Vector Store
-            IndexRepositoryService().index(repository_id=repository.id, scanned_files=scanned_files)
+            IndexRepositoryService().index(repository_id=repository.id, scanned_files=scanned_files, db=db, repository=repository)
 
             existing_files = (
                 db.query(RepositoryFile)
@@ -75,5 +74,14 @@ class RepositorySyncService:
             db.add_all(new_files)
             db.commit()
             RepositoryStatusService.update(db=db, repository=repository, status=AnalysisStatus.completed, progress=100)
+            
+        except Exception:
+            RepositoryStatusService.update(
+                db=db,
+                repository=repository,
+                status=AnalysisStatus.failed,
+                progress=repository.progress,
+            )
+            raise
         finally:
             db.close()

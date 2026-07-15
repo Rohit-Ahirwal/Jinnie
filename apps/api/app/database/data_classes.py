@@ -20,3 +20,11 @@ class SyncResult:
     modified_files: list[ScannedFile]
     deleted_files: list[RepositoryFile]
     unchanged_files: list[RepositoryFile]
+
+@dataclass
+class RetrievedChunk:
+    content: str
+    path: str
+    filename: str
+    language: str
+    score: float

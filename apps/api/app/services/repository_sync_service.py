@@ -4,8 +4,7 @@ from app.services.repository_scanner import RepositoryScanner
 from app.services.workspace_service import WorkspaceService
 from app.database.models import AnalysisStatus
 from app.services.repository_status_service import RepositoryStatusService
-from app.services.ai.chunking_service import ChunkingSevice
-from app.services.ai.embedding_service import EmbeddingService
+from app.services.ai.index_repository_service import IndexRepositoryService
 
 
 class RepositorySyncService:
@@ -31,21 +30,8 @@ class RepositorySyncService:
 
             RepositoryStatusService.update(db=db, repository=repository, status=AnalysisStatus.syncing, progress=60)
 
-            # 4. Creating Chunks
-            chunking = ChunkingSevice()
-            document = chunking.create_document(scanned_files[0])
-
-            chunks = chunking.split(document)
-
-            # 5. Embeding
-            embedding = EmbeddingService()
-
-            vector = embedding.embed_documents(["Hello Jinnie"])
-
-            print(len(vector))
-            print(len(vector[0]))
-
-
+            # 4. Handling Chunking, Embedding, and Vector Store
+            IndexRepositoryService().index(repository_id=repository.id, scanned_files=scanned_files)
 
             existing_files = (
                 db.query(RepositoryFile)

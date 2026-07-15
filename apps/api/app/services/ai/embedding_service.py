@@ -2,6 +2,7 @@ import os
 
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from dotenv import load_dotenv
+from tenacity import retry, wait_exponential, stop_after_attempt
 
 load_dotenv()
 
@@ -14,6 +15,7 @@ class EmbeddingService:
             model="gemini-embedding-2",
         )
 
+    @retry(wait=wait_exponential(multiplier=2), stop=stop_after_attempt(5))
     def embed_documents(self, texts: list[str]):
         return self.embeddings.embed_documents(texts)
 

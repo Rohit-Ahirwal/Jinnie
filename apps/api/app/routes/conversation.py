@@ -12,14 +12,14 @@ router = APIRouter(prefix="/conversations", tags=["Conversation"])
 
 @router.get(
     "/repository/{github_repository_id}",
-    response_model=ConversationResponse,
+    response_model=list[ConversationResponse],
 )
 def get_repository_conversation(
     github_repository_id: str,
     user_id=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    return ConversationService.get_or_create(
+    return ConversationService.get_conversations(
         db=db,
         github_repository_id=github_repository_id,
         user_id=user_id["sub"],

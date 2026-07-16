@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { RepoDB } from "@/app/types";
 import { timeAgo } from "@/lib/timeAgo";
 import { getRepositoryStatus } from "@/lib/repository-status";
+import Link from "next/link";
 
 export default function RepoCard({ repo }: { repo: RepoDB }) {
   const status = getRepositoryStatus(repo.status);
@@ -119,9 +120,11 @@ export default function RepoCard({ repo }: { repo: RepoDB }) {
             View Details
           </Button>
 
-          <Button className="rounded-full bg-primary text-neutral-50 px-5">
-            Open Chat
-          </Button>
+          <Link href={`/chat/${repo.github_repo_id}`}>
+            <Button className="rounded-full bg-primary text-neutral-50 px-5">
+              Open Chat
+            </Button>
+          </Link>
         </CardFooter>
       </Card>
     </motion.div>

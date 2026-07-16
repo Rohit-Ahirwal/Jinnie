@@ -4,16 +4,14 @@ import { useEffect, useRef } from "react";
 
 import ChatMessage from "./chat-message";
 import ChatEmpty from "./chat-empty";
+import { Message, MessageResponse } from "@/app/types";
 
-const messages = [
-  {
-    id: 1,
-    role: "assistant",
-    content: "Hi! I'm Jinnie. Ask me anything about your repository.",
-  },
-];
+type ChatMessageParams = {
+  messages: Message[]
+  newMessages: MessageResponse[]
+}
 
-export default function ChatMessages() {
+export default function ChatMessages({ messages, newMessages }: ChatMessageParams) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -22,7 +20,7 @@ export default function ChatMessages() {
     });
   }, [messages]);
 
-  if (messages.length === 0) {
+  if (!messages) {
     return <ChatEmpty />;
   }
 
@@ -31,6 +29,10 @@ export default function ChatMessages() {
       <div className="mx-auto flex min-h-full w-full max-w-5xl flex-col gap-6 px-8 pt-8 pb-44">
         {messages.map((message) => (
           <ChatMessage key={message.id} message={message} />
+        ))}
+
+        {newMessages.map((message) => (
+          <ChatMessage key={message.message.id} message={message.message}/>
         ))}
 
         {/* Auto scroll target */}

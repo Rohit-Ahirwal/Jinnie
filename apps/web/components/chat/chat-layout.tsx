@@ -5,8 +5,39 @@ import { motion } from "framer-motion";
 import RepositorySidebar from "./repository-sidebar";
 import ChatPanel from "./chat-panel";
 import ContextSidebar from "./context-sidebar";
+import { Conversation, Message, MessageResponse, UserProfile } from "@/app/types";
+import { useEffect, useState } from "react";
+import { apiRequest } from "@/lib/api/auth-client";
 
-export default function ChatLayout() {
+type ChatLayoutParams = {
+  token: string;
+  user: UserProfile;
+  conversation: Conversation;
+  chatLoading: boolean
+}
+
+export default function ChatLayout({
+  token,
+  user,
+  conversation,
+  chatLoading
+}: ChatLayoutParams) {
+  const [messages, setMessages] = useState<Message[]>();
+  const [newmessages, setNewMessages] = useState<MessageResponse[]>([]);
+
+  useEffect(() => {
+    async function getPrevMessages() {
+      const response = await apiRequest<Message[]>(token, {
+        method: "GET",
+        url: `/messages/conversation/${conversation.id}`
+      });
+
+      setMessages(response.data);
+    }
+
+    getPrevMessages();
+  }, [conversation.id, token])
+
   return (
     <div className="flex h-full overflow-hidden bg-background">
       <motion.div
@@ -22,7 +53,7 @@ export default function ChatLayout() {
 
         {/* Chat */}
         <main className="overflow-hidden rounded-3xl border bg-card">
-          <ChatPanel />
+          <ChatPanel messages={messages!} newMessages={newmessages} setNewMessages={setNewMessages} token={token} conversation={conversation} />
         </main>
 
         {/* Context */}

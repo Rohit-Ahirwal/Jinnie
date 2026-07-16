@@ -1,3 +1,5 @@
+import { number } from "framer-motion";
+
 export type Repo = {
   id: string;
   name: string;
@@ -57,4 +59,33 @@ export interface TreeNode {
   path: string;
   type: "file" | "folder";
   children?: TreeNode[];
+}
+
+export interface Conversation {
+  id: number,
+  repo_id: number,
+  title: string,
+  created_at: string,
+  updated_at: string
+}
+
+export interface Message {
+  id: number,
+  role: "assistant" | "user" | "system",
+  status: "pending" | "streaming" | "completed" | "failed",
+  content: string,
+  token_count: number,
+  created_at: string
+}
+
+export interface MessageResponse {
+  conversation_id: number,
+  message: Message,
+  sources?: {
+    path: string,
+    filename: string,
+    language: string,
+    score: number,
+    chunk_index: number
+  }[]
 }

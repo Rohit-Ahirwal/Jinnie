@@ -6,12 +6,10 @@ import { Bot, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Markdown from "./markdown";
 import MessageActions from "./message-actions";
+import { Message } from "@/app/types";
 
 interface Props {
-  message: {
-    role: string;
-    content: string;
-  };
+  message: Message
 }
 
 export default function ChatMessage({ message }: Props) {

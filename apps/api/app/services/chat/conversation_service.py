@@ -7,12 +7,22 @@ class ConversationService:
     @staticmethod
     def get_or_create(
         db: Session,
-        repository_id: int,
+        github_repository_id: str,
+        user_id: str
     ) -> Conversation:
+        repository = db.query(Repositories).filter(
+            Repositories.github_repo_id == github_repository_id,
+            Repositories.user_id == user_id,
+        ).first()
+
+        print(repository)
+        print(github_repository_id)
+        print(user_id)
+
         conversation = (
             db.query(Conversation)
             .filter(
-                Conversation.repository_id == repository_id
+                Conversation.repository_id == repository.id
             )
             .first()
         )

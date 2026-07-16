@@ -28,3 +28,8 @@ class RetrievedChunk:
     filename: str
     language: str
     score: float
+
+@dataclass
+class AIResponse:
+    content: str
+    token_count: int

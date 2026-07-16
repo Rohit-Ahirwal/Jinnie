@@ -8,6 +8,8 @@ from app.schemas.message import (
     MessageResponse,
 )
 from app.services.chat.message_service import MessageService
+from app.services.chat.chat_service import ChatService
+from app.schemas.chat import ChatResponse
 
 router = APIRouter(
     prefix="/messages",
@@ -31,29 +33,15 @@ def get_messages(
 
 @router.post(
     "/conversation/{conversation_id}",
-    response_model=MessageResponse,
+    response_model=ChatResponse,
 )
 def create_message(
     conversation_id: int,
     body: CreateMessageRequest,
     db: Session = Depends(get_db),
 ):
-    conversation = (
-        db.query(Conversation)
-        .filter(
-            Conversation.id == conversation_id
-        ).first()
-    )
-
-    if conversation is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Conversation not found",
-        )
-
-    return MessageService.create(
-        db=db,
-        conversation=conversation,
-        role=MessageRole.user,
-        content=body.content,
+    chat = ChatService(db)
+    return chat.ask(
+        conversation_id=conversation_id,
+        question=body.content
     )

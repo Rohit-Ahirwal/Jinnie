@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     EMBED_DELAY_SECONDS: float
     EMBED_MAX_RETRIES: int = 5
     EMBED_BACKOFF_MULTIPLIER: int
+    CHAT_MODEL: str
+    EMBEDDING_MODEL: str
 
     model_config = SettingsConfigDict(
         env_file=".env",

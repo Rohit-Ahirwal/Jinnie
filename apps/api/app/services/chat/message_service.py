@@ -23,6 +23,7 @@ class MessageService:
         conversation: Conversation,
         role: MessageRole,
         content: str,
+        token_count: int = 0,
         status: MessageStatus = MessageStatus.completed,
     ) -> Message:
 
@@ -31,6 +32,7 @@ class MessageService:
             role=role,
             content=content,
             status=status,
+            token_count=token_count
         )
 
         db.add(message)

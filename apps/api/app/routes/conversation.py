@@ -5,6 +5,7 @@ from app.schemas.conversation import ConversationResponse
 from app.services.chat.conversation_service import ConversationService
 from app.database.session import get_db
 from app.services.ai.retrieval_service import RetrievalService
+from app.services.ai.gemini_service import GeminiService
 
 router = APIRouter(prefix="/conversations", tags=["Conversation"])
 
@@ -24,7 +25,11 @@ def get_repository_conversation(
 
 @router.get("/test-retrieval/{repository_id}")
 def test(repository_id: int):
-    return RetrievalService().retrieve(
-        repository_id=repository_id,
-        question="How is the resizable console implemented?",
+    service = GeminiService()
+
+    response = service.generate(
+        "Reply with exactly: Hello Jinnie"
     )
+
+    print(response.content)
+    return "Hello Jinnie"

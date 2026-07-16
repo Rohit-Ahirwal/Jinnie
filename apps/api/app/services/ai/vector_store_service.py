@@ -74,7 +74,6 @@ class VectorStoreService:
             repository_id: int,
             limit: int = 10,
     ):
-        print("Searching repository:", repository_id, type(repository_id))
         return self.client.query_points(
             collection_name=self.COLLECTION_NAME,
             query=query_vector,

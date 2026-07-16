@@ -88,4 +88,5 @@ export interface MessageResponse {
     score: number,
     chunk_index: number
   }[]
+  streaming?: boolean
 }

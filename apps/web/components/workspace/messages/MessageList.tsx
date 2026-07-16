@@ -30,7 +30,7 @@ export default function MessageList({ messages, newMessages }: { messages: Messa
       {newMessages.map((message) =>
         message.message.role === "assistant" ? (
           <AIMessage
-            streaming={false}
+            streaming={message.streaming ?? false}
             key={message.message.id}
             content={message.message.content}
           />

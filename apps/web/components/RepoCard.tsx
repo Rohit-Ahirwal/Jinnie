@@ -120,7 +120,7 @@ export default function RepoCard({ repo }: { repo: RepoDB }) {
             View Details
           </Button>
 
-          <Link href={`/chat/${repo.github_repo_id}`}>
+          <Link href={`/repository/${repo.github_repo_id}`}>
             <Button className="rounded-full bg-primary text-neutral-50 px-5">
               Open Chat
             </Button>

@@ -2,6 +2,12 @@ from dataclasses import dataclass
 
 from app.database.models import RepositoryFile
 
+from enum import Enum
+
+class StreamEventType(str, Enum):
+    TOKEN = "token"
+    DONE = "done"
+    ERROR = "error"
 
 @dataclass(slots=True)
 class ScannedFile:
@@ -33,3 +39,18 @@ class RetrievedChunk:
 class AIResponse:
     content: str
     token_count: int
+
+@dataclass
+class StreamEvent:
+    type: StreamEventType
+    content: str | None = None
+    token_count: int | None = None
+
+
+@dataclass
+class StreamEvent:
+    type: StreamEventType
+    content: str | None = None
+    token_count: int | None = None
+    assistant_id: int | None = None
+    sources: list | None = None

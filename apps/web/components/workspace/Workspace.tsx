@@ -7,7 +7,7 @@ import LeftSidebar from "./LeftSidebar";
 import ChatPanel from "./panel/ChatPanel";
 import RightSidebar from "./context/RightSidebar";
 import ResizeHandle from "./ResizeHandle";
-import { Conversation, Message, MessageResponse, UserProfile } from "@/app/types";
+import { Conversation, Message, UserProfile } from "@/app/types";
 import { Dispatch, useEffect, useState } from "react";
 import { apiRequest } from "@/lib/api/auth-client";
 
@@ -32,7 +32,6 @@ export default function Workspace({
 }: WorkspaceProps) {
   
   const [messages, setMessages] = useState<Message[]>([]);
-  const [newMessages, setNewMessages] = useState<MessageResponse[]>([]);
 
   useEffect(() => {
     async function getPrevMessages() {
@@ -72,8 +71,6 @@ export default function Workspace({
 
         <Panel defaultSize={58} minSize={40}>
           <ChatPanel
-            newMessages={newMessages}
-            setNewMessages={setNewMessages}
             messages={messages}
             selectedChatId={selectedChatId}
             chatLoading={chatLoading}

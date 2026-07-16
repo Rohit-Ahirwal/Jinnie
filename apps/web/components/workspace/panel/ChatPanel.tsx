@@ -5,24 +5,22 @@ import ChatInput from "../input/ChatInput";
 import { Message, MessageResponse } from "@/app/types";
 import EmptyWorkspace from "../EmptyWorkspace";
 import ChatLoading from "../ChatLoading";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 interface ChatPanelProps {
   messages: Message[];
   selectedChatId?: number | null;
   chatLoading: boolean;
   token: string;
-  newMessages: MessageResponse[];
-  setNewMessages: Dispatch<SetStateAction<MessageResponse[]>>;
 }
 
 export default function ChatPanel({
   messages,
   selectedChatId,
   chatLoading,
-  token,
-  newMessages,
-  setNewMessages,
+  token
 }: ChatPanelProps) {
+  
+  const [newMessages, setNewMessages] = useState<MessageResponse[]>([]);
 
   if (chatLoading) return <ChatLoading />;
 

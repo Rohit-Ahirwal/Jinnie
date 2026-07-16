@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.database.session import get_db
-from app.database.models import Conversation, MessageRole
 from app.schemas.message import (
     CreateMessageRequest,
     MessageResponse,
@@ -44,4 +44,19 @@ def create_message(
     return chat.ask(
         conversation_id=conversation_id,
         question=body.content
+    )
+
+@router.post(
+    "/conversation/{conversation_id}/stream",
+    response_model=MessageResponse,
+)
+def create_message(
+    conversation_id: int,
+    body: CreateMessageRequest,
+    db: Session = Depends(get_db),
+):
+    chat = ChatService(db)
+    return StreamingResponse(
+        chat.stream(conversation_id=conversation_id, question=body.content),
+        media_type="text/event-stream",
     )

@@ -1,15 +1,23 @@
 from app.database.connection import SessionLocal
-from app.database.models import RepositoryFile, Repositories
-from app.services.repository_scanner import RepositoryScanner
-from app.services.workspace_service import WorkspaceService
 from app.database.models import AnalysisStatus
-from app.services.repository_status_service import RepositoryStatusService
+from app.database.models import Repositories
 from app.services.ai.index_repository_service import IndexRepositoryService
+from app.services.repository_scanner import RepositoryScanner
+from app.services.repository_status_service import RepositoryStatusService
+from app.services.workspace_service import WorkspaceService
+from app.services.repository_diff_service import RepositoryDiffService
+from app.services.repository_metadata_service import RepositoryMetadataService
+from app.services.ai.vector_store_service import VectorStoreService
+from app.services.ai.chunking_service import ChunkingSevice
 
 
 class RepositorySyncService:
     def sync(self, repository_id: int):
         db = SessionLocal()
+        indexer = IndexRepositoryService()
+        vector_store = VectorStoreService()
+        chunking = ChunkingSevice()
+
         # 1. Load Repo
         repository = db.query(Repositories).filter(Repositories.id == repository_id).first()
 
@@ -25,56 +33,78 @@ class RepositorySyncService:
             RepositoryStatusService.update(db=db, repository=repository, status=AnalysisStatus.scanning, progress=30)
 
             scanner = RepositoryScanner()
+
             scanned_files = scanner.scan(repo_path)
+
+            diff = RepositoryDiffService().compare(
+                db=db,
+                repository_id=repository_id,
+                scanned_files=scanned_files,
+            )
+
+            # Delete vectors for modified files
+            for file in diff.modified_files:
+                vector_store.delete_file(
+                    repository_id=repository_id,
+                    relative_path=file.relative_path,
+                )
+
+            # Delete vectors for deleted files
+            for file in diff.deleted_files:
+                vector_store.delete_file(
+                    repository_id=repository_id,
+                    relative_path=file.path,
+                )
+
+            total_chunks = 0
+
+            for file in diff.new_files:
+                total_chunks += chunking.count_chunks(file)
+
+            for file in diff.modified_files:
+                total_chunks += chunking.count_chunks(file)
+
+            repository.index_total_chunks = total_chunks
+            repository.index_processed_chunks = 0
+
+            db.commit()
+
+            indexer.start(
+                repository_id=repository_id,
+                repository=repository,
+                db=db,
+                reindex=False,
+            )
 
             RepositoryStatusService.update(db=db, repository=repository, status=AnalysisStatus.syncing, progress=60)
 
-            # 4. Handling Chunking, Embedding, and Vector Store
-            IndexRepositoryService().index(repository_id=repository.id, scanned_files=scanned_files, db=db, repository=repository)
+            for file in diff.new_files:
+                indexer.index_file(file)
 
-            existing_files = (
-                db.query(RepositoryFile)
-                .filter(
-                    RepositoryFile.repository_id == repository_id
-                )
-                .all()
+            for file in diff.modified_files:
+                indexer.index_file(file)
+
+            indexer.finish()
+
+            metadata = RepositoryMetadataService()
+
+            metadata.add_new_files(
+                db=db,
+                repository_id=repository_id,
+                files=diff.new_files,
             )
 
-            existing_map = {
-                file.path: file
-                for file in existing_files
-            }
+            metadata.update_modified_files(
+                db=db,
+                repository_id=repository_id,
+                files=diff.modified_files,
+            )
 
-            new_files = []
-            modified_files = []
-            deleted_files = []
+            metadata.delete_files(
+                db=db,
+                files=diff.deleted_files,
+            )
 
-            for scanned_file in scanned_files:
-                db_file = existing_map.get(scanned_file.relative_path)
-
-                if db_file is None:
-                    new_files.append(
-                        RepositoryFile(
-                            repository_id=repository.id,
-                            path=scanned_file.relative_path,
-                            filename=scanned_file.filename,
-                            extension=scanned_file.extension,
-                            language=scanned_file.language,
-                            size=scanned_file.size,
-                            hash=scanned_file.hash,
-                        ))
-                    continue
-
-                if db_file.hash != scanned_file.hash:
-                    db_file.hash = scanned_file.hash
-                    db_file.size = scanned_file.size
-                    db_file.language = scanned_file.language
-                    modified_files.append(db_file)
-
-            db.add_all(new_files)
-            db.commit()
-            RepositoryStatusService.update(db=db, repository=repository, status=AnalysisStatus.completed, progress=100)
-            
         except Exception:
             RepositoryStatusService.update(
                 db=db,

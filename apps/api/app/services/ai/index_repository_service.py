@@ -1,7 +1,4 @@
-import time
-
-import math
-
+from langchain_core.documents import Document
 from sqlalchemy.orm import Session
 
 from app.services.ai.chunking_service import ChunkingSevice
@@ -10,65 +7,128 @@ from app.services.ai.vector_store_service import VectorStoreService
 from app.config import settings
 from app.services.repository_status_service import RepositoryStatusService
 from app.database.models import AnalysisStatus
+from app.database.data_classes import ScannedFile
+from app.database.models import Repositories
 
 
 class IndexRepositoryService:
 
-    def index(self, repository_id: int, repository, scanned_files: list, db: Session):
-        BATCH_SIZE = settings.EMBED_BATCH_SIZE
-        chunking = ChunkingSevice()
-        embedding = EmbeddingService()
-        vector_store = VectorStoreService()
+    def __init__(self):
+        self.repository: Repositories|None = None
+        self.db = None
+        self.repository_id = None
+        self.current_file = None
+        self.resume_mode = False
+        self.next_chunk_index = 0
+        self.batch: list[Document] = []
+        self.chunking = ChunkingSevice()
+        self.embedding = EmbeddingService()
+        self.vector_store = VectorStoreService()
+        self.batch_size = settings.BATCH_SIZE
 
-        vector_store.create_collection(
-            embedding.dimensions()
+    def start(self, repository_id: int, repository: Repositories, db: Session, reindex: bool):
+        self.batch = []
+        self.db = db
+        self.repository_id = repository_id
+        self.repository = repository
+
+        self.vector_store.create_collection(
+            self.embedding.dimensions()
         )
 
-        vector_store.delete_repository(repository_id)
+        if reindex:
+            self.vector_store.delete_repository(repository_id)
 
-        all_chunks = []
+        self.resume_mode = self.repository.index_current_file is not None
 
-        for scanned_file in scanned_files:
-            document = chunking.create_document(scanned_file)
 
-            chunks = chunking.split(document)
 
-            all_chunks.extend(chunks)
+    def index_file(self, scanned_file: ScannedFile):
 
-            if not chunks:
-                continue
+        resume_chunk = self.repository.index_next_chunk
 
-        if not all_chunks:
+        # ---------- Resume ----------
+
+        if self.resume_mode:
+
+            if scanned_file.relative_path != self.repository.index_current_file:
+                return
+
+            self.resume_mode = False
+
+        # ----------------------------
+
+        self.current_file = scanned_file.relative_path
+
+        document = self.chunking.create_document(scanned_file)
+
+        chunks = self.chunking.split(document)
+
+        if resume_chunk > 0:
+
+            chunks = chunks[resume_chunk:]
+
+        start_index = resume_chunk
+
+        for index, chunk in enumerate(chunks, start=start_index):
+            self.batch.append(chunk)
+
+            self.next_chunk_index = index + 1
+
+            if len(self.batch) >= self.batch_size:
+                self.flush()
+
+        # Flush Remaining of files
+        self.flush()
+
+
+    def flush(self):
+        if not self.batch:
             return
 
-        total_batches = math.ceil(
-            len(all_chunks) / BATCH_SIZE
+        # Embedding & Vector Upload
+
+        vectors = self.embedding.embed_documents(
+            [chunk.page_content for chunk in self.batch],
         )
 
-        for i in range(0, len(all_chunks), BATCH_SIZE):
-            batch = all_chunks[i:i + BATCH_SIZE]
+        self.vector_store.upsert_chunks(
+            repository_id=self.repository_id,
+            vectors=vectors,
+            chunks=self.batch,
+        )
 
-            vectors = embedding.embed_documents(
-                [chunk.page_content for chunk in batch]
-            )
+        processed_chunk_count = len(self.batch)
 
-            vector_store.upsert_chunks(
-                repository_id=repository_id,
-                chunks=batch,
-                vectors=vectors,
-            )
+        self.repository.index_processed_chunks += processed_chunk_count
+        self.repository.index_processed_batches += 1
 
-            current_batch = (i // BATCH_SIZE) + 1
+        self.repository.index_current_file = self.current_file
+        self.repository.index_next_chunk = self.next_chunk_index
 
+        self.db.commit()
+
+        if self.repository.index_total_chunks > 0:
             progress = 60 + int(
-                (current_batch / total_batches) * 35
+                (
+                        self.repository.index_processed_chunks
+                        / self.repository.index_total_chunks
+                ) * 35
             )
+        else:
+            progress = 95
 
-            RepositoryStatusService.update(
-                db=db,
-                repository=repository,
-                status=AnalysisStatus.syncing,
-                progress=progress,
-            )
+        RepositoryStatusService.update(
+            db=self.db,
+            repository=self.repository,
+            status=AnalysisStatus.syncing,
+            progress=progress,
+        )
 
-            time.sleep(settings.EMBED_DELAY_SECONDS)
+        self.batch.clear()
+
+    def finish(self):
+        self.flush()
+        self.repository.index_current_file = None
+        self.repository.index_next_chunk = 0
+        self.db.commit()

@@ -54,3 +54,10 @@ class StreamEvent:
     token_count: int | None = None
     assistant_id: int | None = None
     sources: list | None = None
+
+@dataclass
+class RepositoryDiff:
+    new_files: list[ScannedFile]
+    modified_files: list[ScannedFile]
+    deleted_files: list[RepositoryFile]
+    unchanged_files: list[RepositoryFile]

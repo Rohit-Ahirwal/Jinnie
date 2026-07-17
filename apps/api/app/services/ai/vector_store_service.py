@@ -39,7 +39,7 @@ class VectorStoreService:
             point_id = str(
                 uuid.uuid5(
                     uuid.NAMESPACE_DNS,
-                    f"{repository_id}:{chunk.metadata['path']}:{index}"
+                    f"{repository_id}:{chunk.metadata['path']}:{chunk.metadata['chunk_index']}"
                 )
             )
 
@@ -53,7 +53,7 @@ class VectorStoreService:
                     "extension": chunk.metadata["extension"],
                     "language": chunk.metadata["language"],
                     "hash": chunk.metadata["hash"],
-                    "chunk_index": index,
+                    "chunk_index": chunk.metadata['chunk_index'],
                     "content": chunk.page_content,
                 },
             )
@@ -97,6 +97,27 @@ class VectorStoreService:
                         key="repository_id",
                         match=MatchValue(value=repository_id),
                     )
+                ]
+            ),
+        )
+
+    def delete_file(
+            self,
+            repository_id: int,
+            relative_path: str,
+    ):
+        self.client.delete(
+            collection_name=self.COLLECTION_NAME,
+            points_selector=Filter(
+                must=[
+                    FieldCondition(
+                        key="repository_id",
+                        match=MatchValue(value=repository_id),
+                    ),
+                    FieldCondition(
+                        key="path",
+                        match=MatchValue(value=relative_path),
+                    ),
                 ]
             ),
         )

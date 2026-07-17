@@ -19,7 +19,6 @@ class TimestampMixin:
         nullable=False,
     )
 
-
 class AnalysisStatus(str, _Enum):
     pending = "pending"
     cloning = "cloning"
@@ -33,7 +32,6 @@ class MessageRole(str, _Enum):
     assistant = "assistant"
     system = "system"
 
-
 class MessageStatus(str, _Enum):
     pending = "pending"
     streaming = "streaming"
@@ -42,7 +40,6 @@ class MessageStatus(str, _Enum):
 
 class Base(DeclarativeBase):
     pass
-
 
 class User(Base):
     __tablename__ = "users"
@@ -90,7 +87,6 @@ class User(Base):
         uselist=False,
         cascade="all, delete-orphan"
     )
-
 
 class GithubConnection(Base):
     __tablename__ = "github_connections"
@@ -155,7 +151,6 @@ class GithubConnection(Base):
         back_populates="github_connection"
     )
 
-
 class Repositories(Base):
     __tablename__ = "repositories"
 
@@ -204,6 +199,19 @@ class Repositories(Base):
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
+
+    index_total_chunks = Column(Integer, default=0, nullable=False)
+    index_processed_chunks = Column(Integer, default=0, nullable=False)
+
+    index_total_batches = Column(Integer, default=0, nullable=False)
+    index_processed_batches = Column(Integer, default=0, nullable=False)
+
+    index_current_file = Column(String, nullable=True)
+
+    index_next_chunk = Column(Integer, default=0, nullable=False)
+
+    error = Column(Text, nullable=True)
+
     user = relationship(
         "User",
         back_populates="repositories"
@@ -213,7 +221,6 @@ class Repositories(Base):
         back_populates="repository",
         cascade="all, delete-orphan",
     )
-
 
 class RepositoryFile(Base):
     __tablename__ = "repository_files"
@@ -226,6 +233,8 @@ class RepositoryFile(Base):
     language = Column(String, nullable=False)
     size = Column(Integer, nullable=False)
     hash = Column(String, nullable=False)
+    indexed = Column(Boolean, default=False, nullable=False)
+    last_indexed_hash = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(
         DateTime,
@@ -294,3 +303,4 @@ class Message(Base, TimestampMixin):
         "Conversation",
         back_populates="messages",
     )
+

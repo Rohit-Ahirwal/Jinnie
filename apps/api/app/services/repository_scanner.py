@@ -1,8 +1,8 @@
 from pathlib import Path
-from typing import List
+from typing import List, Generator
 
-from app.utils.file_hash import calculate_file_hash
 from app.database.data_classes import ScannedFile
+from app.utils.file_hash import calculate_file_hash
 
 LANGUAGE_MAP = {
     ".py": "python",
@@ -59,9 +59,10 @@ IGNORE_EXTENSIONS = {
 
 MAX_FILE_SIZE = 1024 * 1024
 
+
 class RepositoryScanner:
 
-    def scan(self, workspace_path: Path) -> List[ScannedFile]:
+    def scan(self, workspace_path: Path) ->  Generator[ScannedFile, None, None]:
         files = []
 
         for path in workspace_path.rglob("*"):
@@ -84,17 +85,13 @@ class RepositoryScanner:
             except UnicodeDecodeError:
                 continue
 
-            files.append(
-                ScannedFile(
-                    path=str(path),
-                    relative_path=str(path.relative_to(workspace_path)),
-                    filename=path.name,
-                    extension=path.suffix,
-                    language=language,
-                    size=path.stat().st_size,
-                    hash=calculate_file_hash(path),
-                    content=content,
-                )
+            yield ScannedFile(
+                path=str(path),
+                relative_path=str(path.relative_to(workspace_path)),
+                filename=path.name,
+                extension=path.suffix,
+                language=language,
+                size=path.stat().st_size,
+                hash=calculate_file_hash(path),
+                content=content,
             )
-
-        return files

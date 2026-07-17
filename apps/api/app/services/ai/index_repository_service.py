@@ -1,4 +1,5 @@
 from langchain_core.documents import Document
+from sentry_sdk import flush
 from sqlalchemy.orm import Session
 
 from app.services.ai.chunking_service import ChunkingSevice
@@ -18,7 +19,6 @@ class IndexRepositoryService:
         self.db = None
         self.repository_id = None
         self.current_file = None
-        self.resume_mode = False
         self.next_chunk_index = 0
         self.batch: list[Document] = []
         self.chunking = ChunkingSevice()
@@ -39,24 +39,14 @@ class IndexRepositoryService:
         if reindex:
             self.vector_store.delete_repository(repository_id)
 
-        self.resume_mode = self.repository.index_current_file is not None
-
 
 
     def index_file(self, scanned_file: ScannedFile):
 
-        resume_chunk = self.repository.index_next_chunk
+        resume_chunk = 0
 
-        # ---------- Resume ----------
-
-        if self.resume_mode:
-
-            if scanned_file.relative_path != self.repository.index_current_file:
-                return
-
-            self.resume_mode = False
-
-        # ----------------------------
+        if scanned_file.relative_path == self.repository.index_current_file:
+            resume_chunk = self.repository.index_next_chunk
 
         self.current_file = scanned_file.relative_path
 
@@ -80,6 +70,11 @@ class IndexRepositoryService:
 
         # Flush Remaining of files
         self.flush()
+
+        if self.repository.index_current_file == scanned_file.relative_path:
+            self.repository.index_current_file = None
+            self.repository.index_next_chunk = 0
+            self.db.commit()
 
 
     def flush(self):
@@ -128,7 +123,10 @@ class IndexRepositoryService:
         self.batch.clear()
 
     def finish(self):
-        self.flush()
         self.repository.index_current_file = None
         self.repository.index_next_chunk = 0
+
+        self.repository.index_total_batches = 0
+        self.repository.index_processed_batches = 0
+
         self.db.commit()

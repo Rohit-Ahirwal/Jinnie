@@ -56,18 +56,24 @@ class RepositorySyncService:
                     relative_path=file.path,
                 )
 
-            total_chunks = 0
+            files_to_index = [
+                *diff.new_files,
+                *diff.modified_files,
+            ]
 
-            for file in diff.new_files:
-                total_chunks += chunking.count_chunks(file)
+            resume = repository.index_current_file is not None
 
-            for file in diff.modified_files:
-                total_chunks += chunking.count_chunks(file)
+            if not resume:
 
-            repository.index_total_chunks = total_chunks
-            repository.index_processed_chunks = 0
+                total_chunks = 0
 
-            db.commit()
+                for file in files_to_index:
+                    total_chunks += chunking.count_chunks(file)
+
+                repository.index_total_chunks = total_chunks
+                repository.index_processed_chunks = 0
+
+                db.commit()
 
             indexer.start(
                 repository_id=repository_id,
@@ -76,15 +82,24 @@ class RepositorySyncService:
                 reindex=False,
             )
 
-            RepositoryStatusService.update(db=db, repository=repository, status=AnalysisStatus.syncing, progress=60)
+            for file in files_to_index:
 
-            for file in diff.new_files:
-                indexer.index_file(file)
+                if resume:
+                    if file.relative_path != repository.index_current_file:
+                        continue
 
-            for file in diff.modified_files:
+                    resume = False
+
                 indexer.index_file(file)
 
             indexer.finish()
+
+            RepositoryStatusService.update(
+                db=db,
+                repository=repository,
+                status=AnalysisStatus.completed,
+                progress=100,
+            )
 
             metadata = RepositoryMetadataService()
 

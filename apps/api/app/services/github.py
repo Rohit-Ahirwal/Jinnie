@@ -7,6 +7,9 @@ from sqlalchemy.orm import Session
 from app.database.models import GithubConnection
 import base64
 
+from app.database.models import Repositories, RepositoryFile
+from app.schemas.repositories import RepositoryResponse
+
 
 def decode_content(content: str):
     return base64.b64decode(content).decode("utf-8")
@@ -153,7 +156,7 @@ async def get_user_repo(access_token: str, search=None):
 
     async with httpx.AsyncClient() as client:
         if search:
-            url = f"{GITHUB_API}/search/repositories"
+            url = f"{GITHUB_API}/search/repos"
 
             params = {
                 "q": f"{search} user:@me",
@@ -183,3 +186,32 @@ async def get_user_repo(access_token: str, search=None):
             return data["items"]
 
         return data
+
+def get_repository(github_repo_id: str, db: Session, user_id: str) -> RepositoryResponse:
+    repository = db.query(Repositories).filter(
+        Repositories.github_repo_id == github_repo_id,
+        Repositories.user_id == user_id
+    ).first()
+
+    file_count = (
+        db.query(RepositoryFile)
+        .filter(
+            Repositories.id == repository.id,
+            Repositories.user_id == user_id
+        )
+        .count()
+    )
+
+    return RepositoryResponse(
+        id=repository.id,
+        repo_name=repository.repo_name,
+        repo_url=repository.repo_url,
+        file_count=file_count,
+        owner=repository.owner,
+        private=repository.private,
+        default_branch=repository.default_branch,
+        language=repository.language,
+        status=repository.status,
+        stars=repository.stars,
+        issues=repository.issues,
+    )

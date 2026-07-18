@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.functions import now
 
 from app.database.models import Conversation, Repositories
 
@@ -27,3 +28,27 @@ class ConversationService:
         )
 
         return conversations
+
+    @staticmethod
+    def create_conversation(
+            db: Session,
+            github_repository_id: str,
+            user_id: str,
+            title: str,
+    ) -> Conversation:
+
+        repository = db.query(Repositories).filter(
+            Repositories.github_repo_id == github_repository_id,
+            Repositories.user_id == user_id,
+        ).first()
+
+        conversation = Conversation(
+            repository_id=repository.id,
+            created_at=now(),
+            title=title,
+        )
+        db.add(conversation)
+        db.commit()
+        db.refresh(conversation)
+
+        return conversation

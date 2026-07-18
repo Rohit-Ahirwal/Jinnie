@@ -11,3 +11,6 @@ class ConversationResponse(BaseModel):
     title: str
     created_at: datetime
     updated_at: datetime
+
+class CreateConversation(BaseModel):
+    title: str

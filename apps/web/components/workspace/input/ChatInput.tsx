@@ -2,21 +2,22 @@
 
 import PromptTextarea from "./PromptTextarea";
 import InputToolbar from "./InputToolbar";
-import { Dispatch, useState } from "react";
+import { useState } from "react";
 import { MessageResponse } from "@/app/types";
 import { chatStream } from "@/lib/api/chat-stream";
+import { useNewMessagesStore } from "@/store/repository-store";
 
 export default function ChatInput({
   selectedChatId,
   token,
-  setNewMessages,
 }: {
   selectedChatId: number;
   token: string;
-  setNewMessages: Dispatch<React.SetStateAction<MessageResponse[]>>;
 }) {
   const [prompt, setPrompt] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  const setNewMessages = useNewMessagesStore((state) => state.setNewMessages)
 
   const submitPrompt = async () => {
     try {

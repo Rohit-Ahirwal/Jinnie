@@ -4,6 +4,7 @@ import { ChevronLeft } from "lucide-react";
 import SampleLogo from "../SampleLogo";
 import { Button } from "../ui/button";
 import Link from "next/link";
+import ThemeSwitcher from "../theme-switcher";
 
 export default function WorkspaceHeader() {
   return (
@@ -18,7 +19,9 @@ export default function WorkspaceHeader() {
         <span>Jinnie</span>
       </div>
 
-      <div>Header Actions</div>
+      <div>
+        <ThemeSwitcher />
+      </div>
     </header>
   );
 }

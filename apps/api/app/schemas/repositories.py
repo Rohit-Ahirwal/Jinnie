@@ -17,8 +17,11 @@ class RepositoryResponse(BaseModel):
     id: int
     repo_name: str
     repo_url: str
+    owner: str
+    private: bool
+    default_branch: str
+    file_count: int
+    language: str
+    stars: int
+    issues: int
     status: str
-    progress: int
-
-    class Config:
-        from_attributes = True

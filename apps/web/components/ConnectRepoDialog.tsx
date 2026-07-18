@@ -65,7 +65,7 @@ export default function ConnectRepoDialog({
 
       await apiRequest(token!, {
         method: "POST",
-        url: "/github/repos",
+        url: "/github/repository",
         data: {
           github_repo_id: String(repo.id),
           repo_name: repo.name,

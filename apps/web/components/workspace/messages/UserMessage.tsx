@@ -1,9 +1,14 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useClerk } from "@clerk/nextjs";
 
 export default function UserMessage({ content }: { content: string }) {
+
+  const { user } = useClerk();
+  const avatarUrl = user?.imageUrl ?? "https://github.com/shadcn.png";
+  
   return (
     <motion.div
       layout
@@ -17,6 +22,7 @@ export default function UserMessage({ content }: { content: string }) {
         </div>
 
         <Avatar>
+          <AvatarImage src={avatarUrl} />
           <AvatarFallback>U</AvatarFallback>
         </Avatar>
       </div>

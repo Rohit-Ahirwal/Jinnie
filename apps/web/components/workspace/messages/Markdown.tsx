@@ -22,7 +22,6 @@ export default function Markdown({ content }: { content: string }) {
 
           return (
             <CodeBlock
-              filename="app/api/auth/route.ts"
               language={match?.[1] ?? "text"}
               code={String(children).replace(/\n$/, "")}
             />

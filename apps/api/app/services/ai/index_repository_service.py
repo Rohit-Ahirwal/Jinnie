@@ -24,7 +24,7 @@ class IndexRepositoryService:
         self.chunking = ChunkingSevice()
         self.embedding = EmbeddingService()
         self.vector_store = VectorStoreService()
-        self.batch_size = settings.BATCH_SIZE
+        self.batch_size = settings.EMBED_BATCH_SIZE
 
     def start(self, repository_id: int, repository: Repositories, db: Session, reindex: bool):
         self.batch = []

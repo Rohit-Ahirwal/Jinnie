@@ -45,10 +45,10 @@ const Dashboard = () => {
         template: "fastapi",
       });
 
-      let query = "/github/repos";
+      let query = "/github/repository";
 
       if (searchValue) {
-        query = `/github/repos?search=${searchValue}`;
+        query = `/github/repository?search=${searchValue}`;
       }
 
       const response = await apiRequest<Repo[]>(token!, {

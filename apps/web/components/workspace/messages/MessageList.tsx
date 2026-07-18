@@ -1,12 +1,16 @@
 "use client";
 
-import { Message, MessageResponse } from "@/app/types";
+import { Message } from "@/app/types";
 import AIMessage from "./AIMessage";
 import UserMessage from "./UserMessage";
 import { useEffect, useRef } from "react";
+import { useNewMessagesStore } from "@/store/repository-store";
 
-export default function MessageList({ messages, newMessages }: { messages: Message[]; newMessages: MessageResponse[] }) {
+export default function MessageList({ messages }: { messages: Message[] }) {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const newMessages = useNewMessagesStore(
+    (state) => state.newMessages
+  )
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({

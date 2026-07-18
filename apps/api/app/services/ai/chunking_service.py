@@ -25,7 +25,13 @@ class ChunkingSevice:
         )
 
     def split(self, document: Document):
-        return self.splitter.split_documents([document])
+        chunks = self.splitter.split_documents([document])
+
+        for index, chunk in enumerate(chunks):
+            chunk.metadata["chunk_index"] = index
+            chunk.metadata["total_chunks"] = len(chunks)
+
+        return chunks
 
     def count_chunks(self, scanned_file: ScannedFile):
         document = self.create_document(scanned_file)

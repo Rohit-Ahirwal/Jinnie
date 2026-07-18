@@ -78,15 +78,17 @@ export interface Message {
   created_at: string
 }
 
+export interface Sources {
+  path: string;
+  filename: string;
+  language: string;
+  score: number;
+  chunk_index: number;
+}
+
 export interface MessageResponse {
   conversation_id: number,
   message: Message,
-  sources?: {
-    path: string,
-    filename: string,
-    language: string,
-    score: number,
-    chunk_index: number
-  }[]
+  sources?: Sources[],
   streaming?: boolean
 }

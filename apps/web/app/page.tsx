@@ -1,9 +1,9 @@
 import Header from "@/components/home/Header";
 import Hero from "@/components/home/Hero";
 import Features from "@/components/home/Features";
-import ProductDemo from "@/components/home/ProductDemo";
 import Stats from "@/components/home/Stats";
 import HomeFooter from "@/components/home/HomeFooter";
+import LivePreview from "@/components/home/live-preview";
 
 export default function Home() {
   return (
@@ -15,7 +15,7 @@ export default function Home() {
 
         <Features />
 
-        <ProductDemo />
+        <LivePreview />
 
         <Stats />
 

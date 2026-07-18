@@ -3,55 +3,98 @@
 import { motion } from "framer-motion";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useState } from "react";
-
-import { Button } from "@/components/ui/button";
 
 export default function ThemeSwitcher() {
-  const { theme, setTheme } = useTheme();
-  const [isAnimating, setIsAnimating] = useState(false);
+  const { resolvedTheme, setTheme } = useTheme();
 
-  const isDark = theme === "dark";
-
-  function toggleTheme() {
-    setIsAnimating(true);
-
-    setTheme(isDark ? "light" : "dark");
-
-    setTimeout(() => {
-      setIsAnimating(false);
-    }, 500);
-  }
+  const isDark = resolvedTheme === "dark";
 
   return (
-    <Button
-      onClick={toggleTheme}
-      variant="outline"
-      size="icon"
-      className="relative size-11 overflow-hidden rounded-full border-neutral-200 bg-background"
+    <button
+      type="button"
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+      aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
+      className="
+        group
+        relative
+        flex
+        h-11
+        w-20
+        items-center
+        rounded-full
+        border
+        border-border/70
+        bg-muted/60
+        p-1
+        backdrop-blur-xl
+        transition-all
+        duration-300
+        hover:border-primary/30
+        hover:bg-muted
+        hover:shadow-md
+        active:scale-[0.98]
+      "
     >
+      {/* Sliding Thumb */}
       <motion.div
-        animate={{
-          rotate: isAnimating ? 360 : 0,
-          scale: isAnimating ? 1.15 : 1,
-        }}
+        layout
         transition={{
-          duration: 0.5,
-          ease: "easeInOut",
+          type: "spring",
+          stiffness: 500,
+          damping: 35,
         }}
-        className="relative"
+        animate={{
+          x: isDark ? 36 : 0,
+        }}
+        className="
+          absolute
+          left-1
+          top-1
+          flex
+          h-9
+          w-9
+          items-center
+          justify-center
+          rounded-full
+          bg-background
+          shadow-sm
+          ring-1
+          ring-border/50
+        "
       >
-        {isDark ? <Sun className="size-5" /> : <Moon className="size-5" />}
+        <motion.div
+          key={isDark ? "moon" : "sun"}
+          initial={{ rotate: -45, scale: 0.75, opacity: 0 }}
+          animate={{ rotate: 0, scale: 1, opacity: 1 }}
+          exit={{ rotate: 45, scale: 0.75, opacity: 0 }}
+          transition={{ duration: 0.18 }}
+        >
+          {isDark ? (
+            <Moon className="size-4 text-blue-400" />
+          ) : (
+            <Sun className="size-4 text-amber-500" />
+          )}
+        </motion.div>
       </motion.div>
 
-      <motion.span
-        initial={false}
-        animate={{
-          opacity: isAnimating ? 1 : 0,
-          scale: isAnimating ? 1 : 0,
-        }}
-        className="absolute inset-0 rounded-full bg-primary/10"
-      />
-    </Button>
+      {/* Left Icon */}
+      <div className="flex w-full items-center justify-between px-2">
+        <Sun
+          className={`size-4 transition-all duration-300 ${
+            isDark
+              ? "text-muted-foreground/40"
+              : "text-amber-500 opacity-100"
+          }`}
+        />
+
+        <Moon
+          className={`size-4 transition-all duration-300 ${
+            isDark
+              ? "text-blue-400 opacity-100"
+              : "text-muted-foreground/40"
+          }`}
+        />
+      </div>
+    </button>
   );
 }

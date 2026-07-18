@@ -1,24 +1,63 @@
 export default function HomeFooter() {
   return (
-    <footer className="mt-12 pb-8">
-      <div className="max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <p className="text-sm text-muted-foreground">
-          © 2026 Jinnie. Built for developers who ship faster.
-        </p>
+    <footer className="mt-16 border-t border-border">
+      <div
+        className="
+          max-w-[1180px]
+          mx-auto
+          px-4
+          sm:px-6
+          lg:px-8
+          py-8
+          flex
+          flex-col
+          sm:flex-row
+          items-center
+          justify-between
+          gap-4
+        "
+      >
+        <div className="text-center sm:text-left">
+          <p className="font-medium">Jinnie</p>
 
-        <div className="flex justify-center gap-4 mt-3 text-sm text-muted-foreground">
-          <a href="#" className="hover:text-foreground transition">
+          <p className="mt-1 text-sm text-muted-foreground">
+            AI engineering assistant for developers.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-5 text-sm text-muted-foreground">
+          <a
+            href="#"
+            className="
+              hover:text-foreground
+              transition-colors
+            "
+          >
             Privacy
           </a>
 
-          <a href="#" className="hover:text-foreground transition">
+          <a
+            href="#"
+            className="
+              hover:text-foreground
+              transition-colors
+            "
+          >
             Terms
           </a>
 
-          <a href="#" className="hover:text-foreground transition">
+          <a
+            href="#"
+            className="
+              hover:text-foreground
+              transition-colors
+            "
+          >
             Security
           </a>
         </div>
+
+        <p className="text-sm text-muted-foreground">© 2026 Jinnie</p>
       </div>
     </footer>
   );

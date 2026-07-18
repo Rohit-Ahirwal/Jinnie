@@ -18,6 +18,8 @@ class Settings(BaseSettings):
     EMBED_BACKOFF_MULTIPLIER: int
     CHAT_MODEL: str
     EMBEDDING_MODEL: str
+    EMBED_MAX_RPM: int
+    EMBED_MAX_TPM: int
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -21,9 +21,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { SignOutButton } from "@clerk/nextjs";
+import { SignOutButton, useClerk } from "@clerk/nextjs";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 const Header2 = () => {
+
+  const { user } = useClerk();
+  const avatarUrl = user?.imageUrl ?? "https://github.com/shadcn.png";
+  
   return (
     <div className="bg-background border-border border-b border-solid w-full">
       <div className="max-w-[1140px] flex mx-auto px-4 sm:px-6 lg:px-8 justify-between items-center w-full h-16">
@@ -85,7 +90,12 @@ const Header2 = () => {
                 />
               }
             >
-              <CircleUserRound className="size-5" />
+              <Avatar>
+                <AvatarImage src={avatarUrl} />
+                <AvatarFallback>
+                  <CircleUserRound className="size-5" />
+                </AvatarFallback>
+              </Avatar>
             </DropdownMenuTrigger>
 
             <DropdownMenuContent align="end" className="w-48 rounded-xl">

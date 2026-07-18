@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     EMBEDDING_MODEL: str
     EMBED_MAX_RPM: int
     EMBED_MAX_TPM: int
+    VECTOR_SCORE_THRESHOLD: float
+    KEYWORD_CHUNK_LIMIT: int
+    MAX_CONTEXT_CHUNKS: int
 
     model_config = SettingsConfigDict(
         env_file=".env",

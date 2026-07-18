@@ -1,7 +1,8 @@
 "use client";
 
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { useEffect, useState } from "react";
+import { highlighterPromise } from "@/lib/shiki";
+import { useTheme } from "next-themes";
 
 interface Props {
   language: string;
@@ -9,20 +10,28 @@ interface Props {
 }
 
 export default function CodeContent({ language, code }: Props) {
+  const [html, setHtml] = useState("");
+  const { resolvedTheme } = useTheme();
+
+  useEffect(() => {
+    async function highlight() {
+      const highlighter = await highlighterPromise;
+
+      const html = highlighter.codeToHtml(code, {
+        lang: language,
+        theme: resolvedTheme === "dark" ? "github-dark" : "github-light",
+      });
+
+      setHtml(html);
+    }
+
+    highlight();
+  }, [language, code, resolvedTheme]);
+
   return (
-    <SyntaxHighlighter
-      language={language}
-      style={oneDark}
-      showLineNumbers
-      wrapLongLines
-      customStyle={{
-        margin: 0,
-        borderRadius: 0,
-        background: "transparent",
-        padding: "1rem",
-      }}
-    >
-      {code}
-    </SyntaxHighlighter>
+    <div
+      className="overflow-x-auto px-6 py-5"
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
   );
 }

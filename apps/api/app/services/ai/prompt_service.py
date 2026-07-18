@@ -1,10 +1,34 @@
 from app.database.models import Message
+from app.database.models import ChatIntent
+from app.prompts.explain_prompt import EXPLAIN_PROMPT
+from app.prompts.architecture_prompt import ARCHITECTURE_PROMPT
+from app.prompts.debug_prompt import DEBUG_PROMPT
+from app.prompts.generate_prompt import GENERATE_PROMPT
+from app.prompts.performance_prompt import PERFORMANCE_PROMPT
+from app.prompts.refactor_prompt import REFACTOR_PROMPT
+from app.prompts.review_prompt import REVIEW_PROMPT
+from app.prompts.security_prompt import SECURITY_PROMPT
+from app.prompts.testing_prompt import TESTING_PROMPT
+from app.prompts.base_prompt import BASE_PROMPT, RESPONSE_FORMAT
 
+PROMPTS = {
+    ChatIntent.EXPLAIN: EXPLAIN_PROMPT,
+    ChatIntent.DEBUG: DEBUG_PROMPT,
+    ChatIntent.ARCHITECTURE: ARCHITECTURE_PROMPT,
+    ChatIntent.GENERATE: GENERATE_PROMPT,
+    ChatIntent.REVIEW: REVIEW_PROMPT,
+    ChatIntent.REFACTOR: REFACTOR_PROMPT,
+    ChatIntent.PERFORMANCE: PERFORMANCE_PROMPT,
+    ChatIntent.SECURITY: SECURITY_PROMPT,
+    ChatIntent.TESTING: TESTING_PROMPT,
+    ChatIntent.GENERAL: "",
+}
 
 class PromptService:
 
     def build(
             self,
+            intent,
             question: str,
             context: list[dict],
             history: list[Message],
@@ -21,28 +45,30 @@ class PromptService:
             for message in history
         )
 
+        intent_prompt = PROMPTS.get(intent, "")
+
         return f"""
-        You are Jinnie, an AI software engineering assistant.
+        {BASE_PROMPT}
         
-        You answer questions ONLY using the provided repository context.
+        {RESPONSE_FORMAT}
         
-        If the answer cannot be found in the context, say that you don't have enough information instead of making something up.
-        
+        {intent_prompt}
+
         ------------------------
         Repository Context
         ------------------------
-        
+
         {context_text}
-        
+
         ------------------------
         Conversation History
         ------------------------
-        
+
         {history_text}
-        
+
         ------------------------
         User Question
         ------------------------
-        
+
         {question}
         """

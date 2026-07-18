@@ -10,13 +10,13 @@ interface Props {
   conversation_id: number;
   github_repo_id: string;
   title: string;
-  updatedAt: string;
+  createdAt: string;
   active?: boolean;
 }
 
 export default function ConversationCard({
   title,
-  updatedAt,
+  createdAt,
   active,
   github_repo_id,
   conversation_id,
@@ -41,7 +41,7 @@ export default function ConversationCard({
           <div className="min-w-0 flex-1">
             <h3 className="truncate text-sm font-medium">{title}</h3>
   
-            <p className="mt-1 text-xs text-muted-foreground">{timeAgo(updatedAt)}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{timeAgo(createdAt)}</p>
           </div>
         </Link>
 

@@ -38,6 +38,18 @@ class MessageStatus(str, _Enum):
     completed = "completed"
     failed = "failed"
 
+class ChatIntent(str, _Enum):
+    EXPLAIN = "EXPLAIN"
+    DEBUG = "DEBUG"
+    GENERATE = "GENERATE"
+    REVIEW = "REVIEW"
+    REFACTOR = "REFACTOR"
+    ARCHITECTURE = "ARCHITECTURE"
+    PERFORMANCE = "PERFORMANCE"
+    SECURITY = "SECURITY"
+    TESTING = "TESTING"
+    GENERAL = "GENERAL"
+
 class Base(DeclarativeBase):
     pass
 

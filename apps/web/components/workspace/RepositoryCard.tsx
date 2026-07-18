@@ -40,8 +40,6 @@ export default function RepositoryCard({
         url: `/github/repositories/${github_repo_id}`,
       });
 
-      console.log(response.data);
-
       setRepository(response.data);
     };
 

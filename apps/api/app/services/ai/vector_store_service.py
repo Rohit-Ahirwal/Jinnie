@@ -121,3 +121,28 @@ class VectorStoreService:
                 ]
             ),
         )
+
+    def search_by_file(
+            self,
+            repository_id: int,
+            relative_path: str,
+            limit: int = 5,
+    ):
+        return self.client.scroll(
+            collection_name=self.COLLECTION_NAME,
+            scroll_filter=Filter(
+                must=[
+                    FieldCondition(
+                        key="repository_id",
+                        match=MatchValue(value=repository_id),
+                    ),
+                    FieldCondition(
+                        key="path",
+                        match=MatchValue(value=relative_path),
+                    ),
+                ]
+            ),
+            limit=limit,
+            with_payload=True,
+            with_vectors=False,
+        )[0]

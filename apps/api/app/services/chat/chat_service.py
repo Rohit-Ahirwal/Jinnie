@@ -9,6 +9,7 @@ from app.services.ai.retrieval_service import RetrievalService
 from app.services.chat.conversation_service import ConversationService
 from app.services.chat.message_service import MessageService
 from app.services.stream.sse import sse
+from app.services.ai.intent_classifier_service import IntentClassifierService
 
 
 class ChatService:
@@ -20,6 +21,7 @@ class ChatService:
         self.message = MessageService()
         self.prompt = PromptService()
         self.gemini = GeminiService()
+        self.intent_classification = IntentClassifierService()
 
     def ask(
             self,
@@ -139,6 +141,7 @@ class ChatService:
 
             # 4. Retrieve Repository Context
             context = self.retrival.retrieve(
+                db=self.db,
                 repository_id=conversation.repository_id,
                 question=question,
             )
@@ -165,8 +168,11 @@ class ChatService:
                     }
                 )
 
+            intent = self.intent_classification.classify(question)
+
             # 5. Create Prompt
             prompt = self.prompt.build(
+                intent=intent,
                 question=question,
                 history=history,
                 context=context,

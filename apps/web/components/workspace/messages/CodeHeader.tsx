@@ -1,8 +1,14 @@
 "use client";
 
-import { Check, Copy, FileCode2, Wand2 } from "lucide-react";
+import { Check, Copy, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface Props {
   filename?: string;
@@ -18,43 +24,54 @@ export default function CodeHeader({ filename, language, code }: Props) {
 
     setCopied(true);
 
-    setTimeout(() => {
-      setCopied(false);
-    }, 2000);
+    setTimeout(() => setCopied(false), 2000);
   }
 
   return (
-    <div className="flex h-12 items-center justify-between border-b bg-muted/50 px-4">
-      <div className="flex items-center gap-3">
-        <FileCode2 className="size-4 text-primary" />
+    <div className="flex h-10 items-center justify-between border-b bg-muted/40 px-4">
+      <div className="flex items-center gap-2 overflow-hidden text-sm">
+        {filename && (
+          <>
+            <span className="truncate font-medium text-foreground">
+              {filename}
+            </span>
 
-        <span className="font-medium">{filename ?? "Generated Code"}</span>
+            <span className="text-muted-foreground">•</span>
+          </>
+        )}
 
-        <span className="rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary uppercase">
+        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           {language}
         </span>
       </div>
 
-      <div className="flex items-center gap-2">
-        <Button size="sm" variant="ghost" onClick={handleCopy}>
-          {copied ? (
-            <>
-              <Check className="mr-2 size-4" />
-              Copied
-            </>
-          ) : (
-            <>
-              <Copy className="mr-2 size-4" />
-              Copy
-            </>
-          )}
-        </Button>
+      <TooltipProvider delayDuration={100}>
+        <div className="flex items-center gap-1">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="icon" variant="ghost">
+                <Sparkles className="size-4" />
+              </Button>
+            </TooltipTrigger>
 
-        <Button size="sm" variant="secondary">
-          <Wand2 className="mr-2 size-4" />
-          Apply
-        </Button>
-      </div>
+            <TooltipContent>Apply</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="icon" variant="ghost" onClick={handleCopy}>
+                {copied ? (
+                  <Check className="size-4 text-green-500" />
+                ) : (
+                  <Copy className="size-4" />
+                )}
+              </Button>
+            </TooltipTrigger>
+
+            <TooltipContent>{copied ? "Copied" : "Copy"}</TooltipContent>
+          </Tooltip>
+        </div>
+      </TooltipProvider>
     </div>
   );
 }

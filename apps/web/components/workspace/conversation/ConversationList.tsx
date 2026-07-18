@@ -10,7 +10,7 @@ export default function ConversationList({ conversations, github_repo_id, select
         <ConversationCard
           key={conversation.id}
           title={conversation.title}
-          updatedAt={conversation.updated_at}
+          createdAt={conversation.created_at}
           conversation_id={conversation.id}
           github_repo_id={github_repo_id}
           active={conversation.id === selectedChatId}

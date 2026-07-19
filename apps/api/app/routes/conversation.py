@@ -8,7 +8,7 @@ from app.services.ai.gemini_service import GeminiService
 from app.services.chat.conversation_service import ConversationService
 from app.schemas.conversation import CreateConversation
 
-router = APIRouter(prefix="/conversations", tags=["Conversation"])
+router = APIRouter(prefix="/conversations", tags=["Conversation"], dependencies=[Depends(get_current_user)])
 
 
 @router.get(
@@ -43,6 +43,17 @@ def create_conversation(
         user_id=user_id["sub"],
     )
 
+@router.delete(
+    "/{conversation_id}" )
+def delete_conversation(
+        conversation_id: int,
+        user_id=Depends(get_current_user),
+        db: Session = Depends(get_db),
+):
+    return ConversationService.delete_conversation(
+        db=db,
+        conversation_id=conversation_id
+    )
 
 @router.get("/test-retrieval/{repository_id}")
 def test(repository_id: int):

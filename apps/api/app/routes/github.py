@@ -14,7 +14,9 @@ from app.services.repository_tree_service import RepositoryTreeService
 from app.schemas.repository_file import RepositoryFileResponse
 from app.services.repository_file_service import RepositoryFileService
 
-router = APIRouter()
+router = APIRouter(
+    dependencies=[Depends(get_current_user)],
+)
 
 @router.get("/callback")
 async def github_callback(state: str, code: str, db: Session = Depends(get_db)):

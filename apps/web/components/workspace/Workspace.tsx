@@ -54,7 +54,7 @@ export default function Workspace() {
 
             <ResizeHandle />
 
-            <Panel defaultSize={58} minSize={40}>
+            <Panel className="min-h-0" defaultSize={58} minSize={40}>
               <ChatPanel />
             </Panel>
 

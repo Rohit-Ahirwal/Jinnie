@@ -1,44 +1,43 @@
-import os
-import httpx
+from fastapi import HTTPException
 
 from jose import jwt, JWTError
 
+from app.config import settings
+from app.auth.jwks_cache import get_jwks
 
-CLERK_JWT_ISSUER = os.getenv(
-    "CLERK_JWT_ISSUER"
-)
-
-CLERK_JWT_JWKS_URL = os.getenv(
-    "CLERK_JWT_JWKS_URL"
-)
 
 async def verify_token(token: str):
 
-    async with httpx.AsyncClient() as client:
-
-        response = await client.get(
-            CLERK_JWT_JWKS_URL
-        )
-
-        jwks = response.json()
+    jwks = await get_jwks()
 
 
     try:
 
         header = jwt.get_unverified_header(token)
 
-
         key = next(
-            key for key in jwks["keys"]
-            if key["kid"] == header["kid"]
+            (
+                k
+                for k in jwks["keys"]
+                if k["kid"] == header["kid"]
+            ),
+            None,
         )
+
+        if key is None:
+            raise HTTPException(
+                status_code=401,
+                detail="Unknown signing key",
+            )
 
 
         payload = jwt.decode(
             token,
             key,
             algorithms=["RS256"],
-            issuer=CLERK_JWT_ISSUER
+            issuer=settings.CLERK_JWT_ISSUER,
+            audience=settings.CLERK_JWT_AUDIENCE,
+
         )
 
 
@@ -47,6 +46,7 @@ async def verify_token(token: str):
 
     except JWTError:
 
-        raise Exception(
-            "Invalid Clerk token"
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid authentication token"
         )

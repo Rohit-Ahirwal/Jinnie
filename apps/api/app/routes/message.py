@@ -10,10 +10,12 @@ from app.schemas.message import (
 from app.services.chat.message_service import MessageService
 from app.services.chat.chat_service import ChatService
 from app.schemas.chat import ChatResponse
+from app.auth.dependencies import get_current_user
 
 router = APIRouter(
     prefix="/messages",
     tags=["Messages"],
+    dependencies=[Depends(get_current_user)]
 )
 
 

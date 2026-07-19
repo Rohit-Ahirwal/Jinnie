@@ -3,21 +3,22 @@
 import PromptTextarea from "./PromptTextarea";
 import InputToolbar from "./InputToolbar";
 import { useState } from "react";
-import { MessageResponse } from "@/app/types";
+import { MessageResponse } from "@/types";
 import { chatStream } from "@/lib/api/chat-stream";
-import { useNewMessagesStore } from "@/store/repository-store";
+import { useWorkspaceStore } from "@/store/workspace-store";
+import { useShallow } from "zustand/react/shallow";
 
-export default function ChatInput({
-  selectedChatId,
-  token,
-}: {
-  selectedChatId: number;
-  token: string;
-}) {
+export default function ChatInput() {
   const [prompt, setPrompt] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const setNewMessages = useNewMessagesStore((state) => state.setNewMessages)
+  const { setNewMessages, selectedChatId, token } = useWorkspaceStore(
+    useShallow((state) => ({
+      setNewMessages: state.setNewMessages,
+      selectedChatId: state.selectedChatId,
+      token: state.token
+    }))
+  );
 
   const submitPrompt = async () => {
     try {

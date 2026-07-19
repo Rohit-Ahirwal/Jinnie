@@ -3,7 +3,8 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import SidebarSection from "./SidebarSection";
 import SourceChip from "./SourceChip";
-import { useNewMessagesStore } from "@/store/repository-store";
+import { useWorkspaceStore } from "@/store/workspace-store";
+import { useShallow } from "zustand/react/shallow";
 
 interface Source {
   path: string;
@@ -14,8 +15,11 @@ interface Source {
 }
 
 export default function RightSidebar() {
-
-  const newMessages = useNewMessagesStore((state) => state.newMessages);
+  const { newMessages } = useWorkspaceStore(
+    useShallow((state) => ({
+      newMessages: state.newMessages,
+    }))
+  );
   
   return (
     <aside className="flex h-full w-full flex-col border-l bg-card">

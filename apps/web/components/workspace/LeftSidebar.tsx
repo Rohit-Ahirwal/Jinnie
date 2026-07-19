@@ -3,7 +3,9 @@
 import RepositoryCard from "./RepositoryCard";
 import NewChatButton from "./NewChatButton";
 import ConversationSection from "./conversation/ConversationSection";
-import { Conversation, UserProfile } from "@/app/types";
+import FilesSection from "./Files/FilesSection";
+
+import { Conversation } from "@/types";
 import { apiRequest } from "@/lib/api/auth-client";
 import { useState } from "react";
 
@@ -18,25 +20,21 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { redirect } from "next/navigation";
+import { useWorkspaceStore } from "@/store/workspace-store";
+import { useShallow } from "zustand/react/shallow";
 
-interface LeftSidebarProps {
-  token: string;
-  github_repo_id: string;
-  user: UserProfile;
-  selectedChatId: number | null;
-  conversations: Conversation[];
-}
-
-export default function LeftSidebar({
-  token,
-  github_repo_id,
-  conversations,
-  user,
-  selectedChatId,
-}: LeftSidebarProps) {
+export default function LeftSidebar() {
   const [title, setTitle] = useState("");
   const [open, setOpen] = useState(false);
+
+  // Subscribe only to what is needed
+  const { token, github_repo_id, setSelectedChatId } = useWorkspaceStore(
+    useShallow((state) => ({
+      token: state.token,
+      github_repo_id: state.github_repo_id,
+      setSelectedChatId: state.setSelectedChatId,
+    })),
+  );
 
   const handleNewChat = async () => {
     if (!title.trim()) return;
@@ -49,10 +47,10 @@ export default function LeftSidebar({
       },
     });
 
-    const data = response.data;
+    const conversation = response.data;
 
-    if (data) {
-      redirect(`repository/${github_repo_id}/chat/${data.id}`)
+    if (conversation) {
+      setSelectedChatId(conversation.id);
     }
 
     setTitle("");
@@ -60,26 +58,22 @@ export default function LeftSidebar({
   };
 
   return (
-    <aside className="flex h-full flex-col border-r bg-card">
+    <aside className="flex h-full flex-col border-r bg-card min-h-0">
       <div className="space-y-3 border-b p-4">
-        <RepositoryCard github_repo_id={github_repo_id} token={token} />
-
+        <RepositoryCard />
         <NewChatButton onClick={() => setOpen(true)} />
       </div>
 
-      <ConversationSection
-        github_repo_id={github_repo_id}
-        conversations={conversations}
-        selectedChatId={selectedChatId}
-      />
+      <ConversationSection />
 
-      <div className="flex-1">Files</div>
+      <div className="flex-1 min-h-0">
+        <FilesSection />
+      </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Create New Chat</DialogTitle>
-
             <DialogDescription>
               Give your conversation a name so you can find it later.
             </DialogDescription>

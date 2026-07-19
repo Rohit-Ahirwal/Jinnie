@@ -4,35 +4,15 @@ import { FolderGit2, Globe, Lock, GitBranch } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { apiRequest } from "@/lib/api/auth-client";
 import Link from "next/link";
+import { RepositoryResponse } from "@/types";
+import { useWorkspaceStore } from "@/store/workspace-store";
 
-interface RepositoryCardProps {
-  github_repo_id: number;
-  token: string;
-}
-
-interface RepositoryResponse {
-  id: number;
-  repo_name: string;
-  repo_url: string;
-  owner: string;
-  private: boolean;
-  default_branch: string;
-  file_count: number;
-  language: string;
-  stars: number;
-  issues: number;
-  status: string;
-}
-
-export default function RepositoryCard({
-  github_repo_id,
-  token,
-}: RepositoryCardProps) {
-  const [repository, setRepository] = useState<RepositoryResponse | null>(null);
-
+export default function RepositoryCard() {
+  const { repository, setRepository, token, github_repo_id } = useWorkspaceStore();
+  
   useEffect(() => {
     const fetchRepository = async () => {
       const response = await apiRequest<RepositoryResponse>(token, {
@@ -44,7 +24,7 @@ export default function RepositoryCard({
     };
 
     fetchRepository();
-  }, [github_repo_id, token]);
+  }, [github_repo_id, token, setRepository]);
 
   return (
     <Card
@@ -60,7 +40,7 @@ export default function RepositoryCard({
         p-4
       "
     >
-      <Link href={repository ? repository.repo_url : "#"} target="_blank">
+      <Link href={repository.repo_url ? repository.repo_url : "#"} target="_blank">
         <div className="flex items-start gap-3">
           <motion.div
             whileHover={{ rotate: -5, scale: 1.05 }}
@@ -92,7 +72,7 @@ export default function RepositoryCard({
               </Badge>
 
               <Badge variant="outline">
-                {repository?.file_count.toLocaleString()} Files
+                {repository?.file_count?.toLocaleString()} Files
               </Badge>
             </div>
           </div>

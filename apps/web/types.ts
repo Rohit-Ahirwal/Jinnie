@@ -1,5 +1,3 @@
-import { number } from "framer-motion";
-
 export type Repo = {
   id: string;
   name: string;
@@ -30,12 +28,7 @@ export type RepoDB = {
   progress: number;
   analyzed_at: string | null;
   status:
-    | "pending"
-    | "cloning"
-    | "scanning"
-    | "syncing"
-    | "completed"
-    | "failed";
+    "pending" | "cloning" | "scanning" | "syncing" | "completed" | "failed";
   default_branch: string;
   repo_url: string;
   owner: string;
@@ -62,20 +55,20 @@ export interface TreeNode {
 }
 
 export interface Conversation {
-  id: number,
-  repo_id: number,
-  title: string,
-  created_at: string,
-  updated_at: string
+  id: number;
+  repo_id: number;
+  title: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Message {
-  id: number,
-  role: "assistant" | "user" | "system",
-  status: "pending" | "streaming" | "completed" | "failed",
-  content: string,
-  token_count: number,
-  created_at: string
+  id: number;
+  role: "assistant" | "user" | "system";
+  status: "pending" | "streaming" | "completed" | "failed";
+  content: string;
+  token_count: number;
+  created_at: string;
 }
 
 export interface Sources {
@@ -87,8 +80,46 @@ export interface Sources {
 }
 
 export interface MessageResponse {
-  conversation_id: number,
-  message: Message,
-  sources?: Sources[],
-  streaming?: boolean
+  conversation_id: number;
+  message: Message;
+  sources?: Sources[];
+  streaming?: boolean;
+}
+
+export interface RepositoryTreeNode {
+  name: string;
+  path: string;
+  type: "file" | "folder";
+  children?: RepositoryTreeNode[];
+}
+
+export interface RepositoryResponse {
+  id: number;
+  repo_name: string;
+  repo_url: string;
+  owner: string;
+  private: boolean;
+  default_branch: string;
+  file_count: number;
+  language: string;
+  stars: number;
+  issues: number;
+  status: string;
+}
+
+export interface FileResponse {
+  name: string;
+  path: string;
+  content: string;
+  language: string;
+  size: number;
+}
+
+export interface EditorStore {
+  tabs: FileResponse[];
+  activeFile: () => FileResponse | null;
+  activePath: string | null;
+  openFile(file: FileResponse): void;
+  closeFile(path: string): void;
+  setActive(path: string): void;
 }

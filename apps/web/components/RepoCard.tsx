@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { RepoDB } from "@/app/types";
+import { RepoDB } from "@/types";
 import { timeAgo } from "@/lib/timeAgo";
 import { getRepositoryStatus } from "@/lib/repository-status";
 import Link from "next/link";

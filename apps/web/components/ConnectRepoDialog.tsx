@@ -20,7 +20,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { FaGithub } from "react-icons/fa";
 
-import { Repo } from "@/app/types";
+import { Repo } from "@/types";
 import { useDebounce } from "@/hooks/use-debounce";
 import FindingRepos from "./FindingRepos";
 import NoReposFound from "./NoReposFound";

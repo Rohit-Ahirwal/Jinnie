@@ -10,8 +10,24 @@ import {
   Sparkles,
 } from "lucide-react";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+
+import { Input } from "@/components/ui/input";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import { apiRequest } from "@/lib/api/auth-client";
+import { Conversation } from "@/types";
+import { useWorkspaceStore } from "@/store/workspace-store";
+import { useShallow } from "zustand/react/shallow";
 
 const actions = [
   {
@@ -37,6 +53,38 @@ const actions = [
 ];
 
 export default function EmptyWorkspace() {
+  const [title, setTitle] = useState("");
+  const [open, setOpen] = useState(false);
+
+  const { token, github_repo_id, setSelectedChatId } = useWorkspaceStore(
+    useShallow((state) => ({
+      token: state.token,
+      github_repo_id: state.github_repo_id,
+      setSelectedChatId: state.setSelectedChatId,
+    })),
+  );
+
+  const handleNewChat = async () => {
+    if (!title.trim()) return;
+
+    const response = await apiRequest<Conversation>(token, {
+      method: "POST",
+      url: `conversations/repository/${github_repo_id}`,
+      data: {
+        title,
+      },
+    });
+
+    const conversation = response.data;
+
+    if (conversation) {
+      setSelectedChatId(conversation.id);
+    }
+
+    setTitle("");
+    setOpen(false);
+  };
+
   return (
     <div className="flex h-full items-center justify-center p-8">
       <motion.div
@@ -59,11 +107,43 @@ export default function EmptyWorkspace() {
             repository.
           </p>
 
-          <Button className="mt-8 gap-2 rounded-xl">
+          <Button onClick={() => setOpen(true)} className="mt-8 gap-2 rounded-xl">
             New Conversation
             <ArrowRight className="size-4" />
           </Button>
         </div>
+
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New Chat</DialogTitle>
+              <DialogDescription>
+                Give your conversation a name so you can find it later.
+              </DialogDescription>
+            </DialogHeader>
+
+            <Input
+              placeholder="e.g. Authentication bug analysis"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleNewChat();
+                }
+              }}
+            />
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setOpen(false)}>
+                Cancel
+              </Button>
+
+              <Button onClick={handleNewChat} disabled={!title.trim()}>
+                Create Chat
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <div className="mt-14 grid gap-5 md:grid-cols-2">
           {actions.map((action) => {

@@ -5,6 +5,7 @@ import { MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { timeAgo } from "@/lib/timeAgo";
+import { useWorkspaceStore } from "@/store/workspace-store";
 
 interface Props {
   conversation_id: number;
@@ -18,9 +19,11 @@ export default function ConversationCard({
   title,
   createdAt,
   active,
-  github_repo_id,
   conversation_id,
 }: Props) {
+
+  const setSelectedChatId = useWorkspaceStore((s) => s.setSelectedChatId);
+  
   return (
     <motion.button
       layout
@@ -37,14 +40,13 @@ export default function ConversationCard({
           <MessageSquare className="size-4" />
         </div>
 
-        <Link href={`/repository/${github_repo_id}/chat/${conversation_id}`}>
-          <div className="min-w-0 flex-1">
-            <h3 className="truncate text-sm font-medium">{title}</h3>
-  
-            <p className="mt-1 text-xs text-muted-foreground">{timeAgo(createdAt)}</p>
-          </div>
-        </Link>
+        <div onClick={() => setSelectedChatId(conversation_id)} className="min-w-0 flex-1">
+          <h3 className="truncate text-sm font-medium">{title}</h3>
 
+          <p className="mt-1 text-xs text-muted-foreground">
+            {timeAgo(createdAt)}
+          </p>
+        </div>
       </div>
     </motion.button>
   );

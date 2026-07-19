@@ -1,6 +1,6 @@
 "use client";
 
-import { Repo, UserProfile } from "@/app/types";
+import { Repo, UserProfile } from "@/types";
 import ConnectGithub from "@/components/ConnectGithub";
 import Loader from "@/components/Loader";
 import { apiRequest } from "@/lib/api/auth-client";

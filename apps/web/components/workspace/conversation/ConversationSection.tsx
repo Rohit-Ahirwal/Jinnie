@@ -4,10 +4,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import ConversationList from "./ConversationList";
 import { Search } from "lucide-react";
-import { Conversation } from "@/app/types";
 
 
-export default function ConversationSection({ conversations, github_repo_id, selectedChatId }: { conversations: Conversation[]; github_repo_id: string; selectedChatId: number | null }) {
+export default function ConversationSection() {
   return (
     <section className="flex h-80 flex-col border-b">
       <div className="space-y-3 p-4">
@@ -21,7 +20,7 @@ export default function ConversationSection({ conversations, github_repo_id, sel
       </div>
 
       <ScrollArea className="flex-1 px-4 pb-4">
-        <ConversationList conversations={conversations} github_repo_id={github_repo_id} selectedChatId={selectedChatId} />
+        <ConversationList />
       </ScrollArea>
     </section>
   );

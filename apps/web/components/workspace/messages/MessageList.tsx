@@ -1,14 +1,19 @@
 "use client";
 
-import { Message } from "@/app/types";
 import AIMessage from "./AIMessage";
 import UserMessage from "./UserMessage";
 import { useEffect, useRef } from "react";
-import { useNewMessagesStore } from "@/store/repository-store";
+import { useWorkspaceStore } from "@/store/workspace-store";
+import { useShallow } from "zustand/react/shallow";
 
-export default function MessageList({ messages }: { messages: Message[] }) {
+export default function MessageList() {
   const bottomRef = useRef<HTMLDivElement>(null);
-  const newMessages = useNewMessagesStore((state) => state.newMessages);
+  const { newMessages, messages } = useWorkspaceStore(
+    useShallow((state) => ({
+      newMessages: state.newMessages,
+      messages: state.messages
+    }))
+  );
 
   useEffect(() => {
     requestAnimationFrame(() => {

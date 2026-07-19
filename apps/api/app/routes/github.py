@@ -9,6 +9,10 @@ from app.database.session import get_db
 from app.schemas.repositories import RepositoryCreate, RepositoryResponse
 from app.services.github import get_or_create_github_user, get_user_repo, get_github_connection
 from app.services.github import get_repository
+from app.schemas.repository_tree import RepositoryTreeNode
+from app.services.repository_tree_service import RepositoryTreeService
+from app.schemas.repository_file import RepositoryFileResponse
+from app.services.repository_file_service import RepositoryFileService
 
 router = APIRouter()
 
@@ -52,3 +56,26 @@ async def github_repos(data: RepositoryCreate, user=Depends(get_current_user), d
 )
 def github_repo(github_repo_id: str, user=Depends(get_current_user), db: Session = Depends(get_db)):
     return get_repository(github_repo_id, db, user["sub"])
+
+@router.get(
+    "/{repository_id}/tree",
+    response_model=list[RepositoryTreeNode],
+)
+def repository_tree(
+    repository_id: int,
+):
+
+    return RepositoryTreeService().get_tree(repository_id)
+
+@router.get(
+    "/{repository_id}/file",
+    response_model=RepositoryFileResponse,
+)
+def repository_file(
+    repository_id: int,
+    path: str,
+):
+    return RepositoryFileService().read(
+        repository_id=repository_id,
+        relative_path=path,
+    )

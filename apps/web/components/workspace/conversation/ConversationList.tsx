@@ -1,12 +1,21 @@
 "use client";
 
+import { useWorkspaceStore } from "@/store/workspace-store";
 import ConversationCard from "./ConversationCard";
-import { Conversation } from "@/app/types";
+import { useShallow } from "zustand/react/shallow";
 
-export default function ConversationList({ conversations, github_repo_id, selectedChatId }: { conversations: Conversation[]; github_repo_id: string; selectedChatId: number | null }) {
+export default function ConversationList() {
+  const { conversations, github_repo_id, selectedChatId } = useWorkspaceStore(
+    useShallow((state) => ({
+      conversations: state.conversations,
+      github_repo_id: state.github_repo_id,
+      selectedChatId: state.selectedChatId,
+    })),
+  );
+  
   return (
     <div className="space-y-2">
-      {conversations.map((conversation) => (
+      {conversations?.map((conversation) => (
         <ConversationCard
           key={conversation.id}
           title={conversation.title}

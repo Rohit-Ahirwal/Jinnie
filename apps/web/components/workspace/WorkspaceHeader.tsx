@@ -5,6 +5,7 @@ import SampleLogo from "../SampleLogo";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import ThemeSwitcher from "../theme-switcher";
+import ModeSwitcher from "../mode-switcher";
 
 export default function WorkspaceHeader() {
   return (
@@ -19,7 +20,8 @@ export default function WorkspaceHeader() {
         <span>Jinnie</span>
       </div>
 
-      <div>
+      <div className="flex gap-2 items-center">
+        <ModeSwitcher />
         <ThemeSwitcher />
       </div>
     </header>
